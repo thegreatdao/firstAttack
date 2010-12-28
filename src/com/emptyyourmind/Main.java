@@ -8,6 +8,8 @@ import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolic
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLayer;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader.ITMXTilePropertiesListener;
+import org.anddev.andengine.entity.layer.tiled.tmx.TMXObject;
+import org.anddev.andengine.entity.layer.tiled.tmx.TMXObjectGroup;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXProperties;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTile;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTileProperty;
@@ -27,8 +29,6 @@ import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.Path;
-
-import android.widget.Toast;
 
 public class Main extends BaseGameActivity 
 {
@@ -94,7 +94,7 @@ public class Main extends BaseGameActivity
 			});
 			this.mTMXTiledMap = tmxLoader.loadFromAsset(this, "tmx/firstAttack.tmx");
 
-			Toast.makeText(this, "Cactus count in this TMXTiledMap: " + this.mCactusCount, Toast.LENGTH_LONG).show();
+//			Toast.makeText(this, "Cactus count in this TMXTiledMap: " + this.mCactusCount, Toast.LENGTH_LONG).show();
 		} catch (final TMXLoadException tmxle) {
 			Debug.e(tmxle);
 		}
@@ -102,6 +102,8 @@ public class Main extends BaseGameActivity
 		final TMXLayer tmxLayer = this.mTMXTiledMap.getTMXLayers().get(0);
 		final TMXLayer tmxLayer2 = this.mTMXTiledMap.getTMXLayers().get(1);
 		final TMXLayer tmxLayer3 = this.mTMXTiledMap.getTMXLayers().get(2);
+		TMXObjectGroup tmxObjectGroup = this.mTMXTiledMap.getTMXObjectGroups().get(0);
+		TMXObject tmxObject = tmxObjectGroup.getTMXObjects().get(0);
 		scene.getBottomLayer().addEntity(tmxLayer);
 		scene.getBottomLayer().addEntity(tmxLayer2);
 		scene.getBottomLayer().addEntity(tmxLayer3);

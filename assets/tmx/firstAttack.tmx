@@ -5,12 +5,12 @@
  </tileset>
  <layer name="Tile Layer 1" width="30" height="30">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC+3UzQ7BQBQF4C4QRIIgoighwRASbLHFFu//LM4kJm5ubqc1owvRxbfo35yemXZUEAQ1RwUoQomdD1M8qzxy69CApsOzPrm2vrbOYUZ9k3J9+/rIYp7TjJnFPCsyrvRuvuurWEbSu1Wg+oW+tlzpu2pDJ8P15eOOYGx550/Z9g06D0tYset9GMAQyjHoPT2B1MfMtURfm8EcFtCCAxzh9DrWtrCDfUyu1IdmT2DK1pzmRnCGC1xfx5FlHoy4vmlz9Rg3uMND6B6Xm9R3DZvg/d8qYZ4p3t21L19bnhsxtLttnm19NWm/oLldT7ynyaP7hTlHv1XfXJ4t7U/mHP0fXPctF/+cm8vlfssT/pMbihAOAAA=
+   H4sIAAAAAAAAC+2VzS8EQRDF+4AgmyCIWCwhwRASXHHFFUc7joajj6OPP92bZDr7vFT39OycJHP4Zbe6t/vNq5qqzZxzw4bkoAcmwCSYqmJPX+KecT6j70WEIX163TkwDxYMnSa6KaT6Vc+s0Rfd5wRS/MZ01W9qXVm3CaE8cx1T8h3Lc5aoa+lZ+j7XdXnOSNt6Nq0v36015/1c7rf8efjZZsAsnbVqWVQahfv7XuWJulYPL4FlOhvrW8Xrx+qrNd4EW4FajENsbnAeDsCh7K+BdbABpgPwb1YNLD/cx0q5twv2wD5YBOfgAlxWcckJOAVnlY72hOWHtbfBjtScdQfgClyDmyoueSCNRyMO+U3VLXN6C+7APeX5yY3eqRcjrvN7BI7dqG8zI88Wr+ANvIMPI67zq7VV3UGAT/AFvsGPEcf8lui80DyvtER9ej2eF36N39XUuRFar5tPvMZ9qDPRQvV5r8n/oqWr91le1Xdb3XFmdVu/HR0d/4tfV1pVVBAOAAA=
   </data>
  </layer>
  <layer name="Tile Layer 2" width="30" height="30">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC+2VoQ6AQAxD91GABSxgAXtggf+3VCzhzLILIROkL3liraicCPmKGS5wDd5NcIN78O4BT3gF7xJCCCFvyP90BWvYaOfdVlZCkudPt7CDvXbebWUl5H96gCOctPNuKyOE/I8bxJhb9RAOAAA=
+   H4sIAAAAAAAAC+3NsQ5AMBRGYQ+FMCFMCBNWrHj/1Rkb0TA0Tch/ki/pvW3SIFCuGjBi8vzvjAWr53837Dg8/6uUUur7JUgt8/XOZSUqy2yeQ0SIjbd3u7d16C2zec6QozDe3u1cV6NB+7BTSv2vE0il/sAQDgAA
   </data>
  </layer>
  <layer name="Tile Layer 3" width="30" height="30">
@@ -18,4 +18,7 @@
    H4sIAAAAAAAAC2NgYGDQBWI9MmhkoATEygykAZgeUmlkgM0thMCof0f9O+pf/G4nBlDTv+T4mxqAnHimBhho/9Lb3wMVzyPVv/QGA5WeBwMY6DAfaWl8FIyCUUAbAAB7HrceEA4AAA==
   </data>
  </layer>
+ <objectgroup name="Object Layer 1" width="30" height="30">
+  <object name="firstBlood" x="296" y="210" width="87" height="49"/>
+ </objectgroup>
 </map>
