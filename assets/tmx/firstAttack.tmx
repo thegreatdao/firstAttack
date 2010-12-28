@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="30" height="30" tilewidth="24" tileheight="28">
+ <tileset firstgid="1" name="starWars" tilewidth="24" tileheight="28" spacing="3" margin="2">
+  <image source="gfx/starWars.png"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="30" height="30">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3UzQ7BQBQF4C4QRIIgoighwRASbLHFFu//LM4kJm5ubqc1owvRxbfo35yemXZUEAQ1RwUoQomdD1M8qzxy69CApsOzPrm2vrbOYUZ9k3J9+/rIYp7TjJnFPCsyrvRuvuurWEbSu1Wg+oW+tlzpu2pDJ8P15eOOYGx550/Z9g06D0tYset9GMAQyjHoPT2B1MfMtURfm8EcFtCCAxzh9DrWtrCDfUyu1IdmT2DK1pzmRnCGC1xfx5FlHoy4vmlz9Rg3uMND6B6Xm9R3DZvg/d8qYZ4p3t21L19bnhsxtLttnm19NWm/oLldT7ynyaP7hTlHv1XfXJ4t7U/mHP0fXPctF/+cm8vlfssT/pMbihAOAAA=
+  </data>
+ </layer>
+ <layer name="Tile Layer 2" width="30" height="30">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+2VoQ6AQAxD91GABSxgAXtggf+3VCzhzLILIROkL3liraicCPmKGS5wDd5NcIN78O4BT3gF7xJCCCFvyP90BWvYaOfdVlZCkudPt7CDvXbebWUl5H96gCOctPNuKyOE/I8bxJhb9RAOAAA=
+  </data>
+ </layer>
+ <layer name="Tile Layer 3" width="30" height="30">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC2NgYGDQBWI9MmhkoATEygykAZgeUmlkgM0thMCof0f9O+pf/G4nBlDTv+T4mxqAnHimBhho/9Lb3wMVzyPVv/QGA5WeBwMY6DAfaWl8FIyCUUAbAAB7HrceEA4AAA==
+  </data>
+ </layer>
+</map>
