@@ -3,22 +3,12 @@
  <tileset firstgid="1" name="starWars" tilewidth="24" tileheight="28" spacing="3" margin="2">
   <image source="gfx/starWars.png"/>
  </tileset>
+ <tileset firstgid="101" name="secondLevel" tilewidth="24" tileheight="28" spacing="3" margin="2">
+  <image source="gfx/secondLevel.png"/>
+ </tileset>
  <layer name="Tile Layer 1" width="30" height="30">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC+2VzS8EQRDF+4AgmyCIWCwhwRASXHHFFUc7joajj6OPP92bZDr7vFT39OycJHP4Zbe6t/vNq5qqzZxzw4bkoAcmwCSYqmJPX+KecT6j70WEIX163TkwDxYMnSa6KaT6Vc+s0Rfd5wRS/MZ01W9qXVm3CaE8cx1T8h3Lc5aoa+lZ+j7XdXnOSNt6Nq0v36015/1c7rf8efjZZsAsnbVqWVQahfv7XuWJulYPL4FlOhvrW8Xrx+qrNd4EW4FajENsbnAeDsCh7K+BdbABpgPwb1YNLD/cx0q5twv2wD5YBOfgAlxWcckJOAVnlY72hOWHtbfBjtScdQfgClyDmyoueSCNRyMO+U3VLXN6C+7APeX5yY3eqRcjrvN7BI7dqG8zI88Wr+ANvIMPI67zq7VV3UGAT/AFvsGPEcf8lui80DyvtER9ej2eF36N39XUuRFar5tPvMZ9qDPRQvV5r8n/oqWr91le1Xdb3XFmdVu/HR0d/4tfV1pVVBAOAAA=
+   H4sIAAAAAAAAC+2Vy1LCQBBFg6K85I3yUAyw4CEuhK+S//8Be5GuutXV6enMUOUmi1MJIcmZ252ZaWRZ1qipqfk3WkSbWBJPxDMcl8U9vwq34r9OpHdMTArHkBjBEb03BXzPhtgCO6c/Ni/zRZyB7wrelLwWXAusgae/qXAtsAah/vK4+P6pw8Pf2gPxKGjC9aaRl8cVk/OF6AsGcH0Q6K/FB7EWfAa8b8ScWCT0d08cBMeAV9a5LK/V0xivrDPmXBHviXm5nshCqTPm9Hp/iIvg6nhOW6/QK+dRaP7gev3qoCwvziPuc9fhRG8O5yeBp7+az0LLdyrGgV6rvzOgqjcXePN2hZdz94RH/i7LK733zou9r/o9p/TXAvdBLa9nHvVKzi1wH9TyavuRZy/0Erte3cOrYT3zBzy8RsMQDgAA
   </data>
  </layer>
- <layer name="Tile Layer 2" width="30" height="30">
-  <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC+3NsQ5AMBRGYQ+FMCFMCBNWrHj/1Rkb0TA0Tch/ki/pvW3SIFCuGjBi8vzvjAWr53837Dg8/6uUUur7JUgt8/XOZSUqy2yeQ0SIjbd3u7d16C2zec6QozDe3u1cV6NB+7BTSv2vE0il/sAQDgAA
-  </data>
- </layer>
- <layer name="Tile Layer 3" width="30" height="30">
-  <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC2NgYGDQBWI9MmhkoATEygykAZgeUmlkgM0thMCof0f9O+pf/G4nBlDTv+T4mxqAnHimBhho/9Lb3wMVzyPVv/QGA5WeBwMY6DAfaWl8FIyCUUAbAAB7HrceEA4AAA==
-  </data>
- </layer>
- <objectgroup name="Object Layer 1" width="30" height="30">
-  <object name="firstBlood" x="296" y="210" width="87" height="49"/>
- </objectgroup>
 </map>

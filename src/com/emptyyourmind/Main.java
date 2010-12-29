@@ -8,8 +8,6 @@ import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolic
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLayer;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader.ITMXTilePropertiesListener;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXObject;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXObjectGroup;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXProperties;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTile;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTileProperty;
@@ -100,14 +98,16 @@ public class Main extends BaseGameActivity
 		}
 
 		final TMXLayer tmxLayer = this.mTMXTiledMap.getTMXLayers().get(0);
-		final TMXLayer tmxLayer2 = this.mTMXTiledMap.getTMXLayers().get(1);
+/*		final TMXLayer tmxLayer2 = this.mTMXTiledMap.getTMXLayers().get(1);
 		final TMXLayer tmxLayer3 = this.mTMXTiledMap.getTMXLayers().get(2);
+		final TMXLayer tmxLayer4 = this.mTMXTiledMap.getTMXLayers().get(3);
 		TMXObjectGroup tmxObjectGroup = this.mTMXTiledMap.getTMXObjectGroups().get(0);
 		TMXObject tmxObject = tmxObjectGroup.getTMXObjects().get(0);
-		scene.getBottomLayer().addEntity(tmxLayer);
 		scene.getBottomLayer().addEntity(tmxLayer2);
 		scene.getBottomLayer().addEntity(tmxLayer3);
+		scene.getBottomLayer().addEntity(tmxLayer4);*/
 
+		scene.getBottomLayer().addEntity(tmxLayer);
 		/* Make the camera not exceed the bounds of the TMXLayer. */
 		this.mBoundChaseCamera.setBounds(0, tmxLayer.getWidth(), 0, tmxLayer.getHeight());
 		this.mBoundChaseCamera.setBoundsEnabled(true);
