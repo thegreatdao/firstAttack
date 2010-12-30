@@ -14,12 +14,14 @@ import org.anddev.andengine.entity.layer.tiled.tmx.TMXTileProperty;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTiledMap;
 import org.anddev.andengine.entity.layer.tiled.tmx.util.exception.TMXLoadException;
 import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
 import org.anddev.andengine.entity.shape.IShape;
 import org.anddev.andengine.entity.shape.modifier.LoopShapeModifier;
 import org.anddev.andengine.entity.shape.modifier.PathModifier;
 import org.anddev.andengine.entity.shape.modifier.PathModifier.IPathModifierListener;
 import org.anddev.andengine.entity.sprite.AnimatedSprite;
 import org.anddev.andengine.entity.util.FPSLogger;
+import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.Texture;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
@@ -28,12 +30,18 @@ import org.anddev.andengine.ui.activity.BaseGameActivity;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.Path;
 
-public class Main extends BaseGameActivity 
+import android.view.MotionEvent;
+
+public class Main extends BaseGameActivity implements IOnSceneTouchListener
 {
 	// ===========================================================
 	// Constants
 	// ===========================================================
-
+	private float mTouchX = 0;
+	private float mTouchY = 0;
+	private float mTouchOffsetX = 0;
+	private float mTouchOffsetY = 0;
+	
 	private static final int CAMERA_WIDTH = 480;
 	private static final int CAMERA_HEIGHT = 320;
 
@@ -98,13 +106,13 @@ public class Main extends BaseGameActivity
 		}
 
 		final TMXLayer tmxLayer = this.mTMXTiledMap.getTMXLayers().get(0);
-/*		final TMXLayer tmxLayer2 = this.mTMXTiledMap.getTMXLayers().get(1);
-		final TMXLayer tmxLayer3 = this.mTMXTiledMap.getTMXLayers().get(2);
+		final TMXLayer tmxLayer2 = this.mTMXTiledMap.getTMXLayers().get(1);
+		/*final TMXLayer tmxLayer3 = this.mTMXTiledMap.getTMXLayers().get(2);
 		final TMXLayer tmxLayer4 = this.mTMXTiledMap.getTMXLayers().get(3);
 		TMXObjectGroup tmxObjectGroup = this.mTMXTiledMap.getTMXObjectGroups().get(0);
-		TMXObject tmxObject = tmxObjectGroup.getTMXObjects().get(0);
+		TMXObject tmxObject = tmxObjectGroup.getTMXObjects().get(0);*/
 		scene.getBottomLayer().addEntity(tmxLayer2);
-		scene.getBottomLayer().addEntity(tmxLayer3);
+		/*scene.getBottomLayer().addEntity(tmxLayer3);
 		scene.getBottomLayer().addEntity(tmxLayer4);*/
 
 		scene.getBottomLayer().addEntity(tmxLayer);
@@ -117,9 +125,9 @@ public class Main extends BaseGameActivity
 		final int centerY = (CAMERA_HEIGHT - this.mPlayerTextureRegion.getTileHeight()) / 2;
 
 		/* Create the sprite and add it to the scene. */
-		final AnimatedSprite player = new AnimatedSprite(centerX, centerY, this.mPlayerTextureRegion);
-		this.mBoundChaseCamera.setChaseShape(player);
-
+		final AnimatedSprite player = new AnimatedSprite(0, 160, this.mPlayerTextureRegion);
+//		this.mBoundChaseCamera.setChaseShape(player);
+/*
 		final Path path = new Path(5).to(0, 160).to(0, 500).to(600, 500).to(600, 160).to(0, 160);
 
 		player.addShapeModifier(new LoopShapeModifier(new PathModifier(60, path, null, new IPathModifierListener() {
@@ -140,16 +148,43 @@ public class Main extends BaseGameActivity
 						break;
 				}
 			}
-		})));
+		})));*/
 
 		scene.getTopLayer().addEntity(player);
-
+	    scene.setOnSceneTouchListener(this);
 		return scene;
 	}
 
 	@Override
 	public void onLoadComplete() {
 
+	}
+
+	@Override
+	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pTouchEvent)
+	{
+		if(pTouchEvent.getAction() == MotionEvent.ACTION_DOWN)
+		{
+			mTouchX = pTouchEvent.getMotionEvent().getX();
+			mTouchY = pTouchEvent.getMotionEvent().getY();
+		}
+		else if(pTouchEvent.getAction() == MotionEvent.ACTION_MOVE)
+		{
+			float newX = pTouchEvent.getMotionEvent().getX();
+			float newY = pTouchEvent.getMotionEvent().getY();
+			
+			mTouchOffsetX = (newX - mTouchX);
+			mTouchOffsetY = (newY - mTouchY);
+			
+			float newScrollX = this.mBoundChaseCamera.getCenterX() - mTouchOffsetX;
+			float newScrollY = this.mBoundChaseCamera.getCenterY() - mTouchOffsetY;
+			
+			this.mBoundChaseCamera.setCenter(newScrollX, newScrollY);
+			
+			mTouchX = newX;
+			mTouchY = newY;
+		}
+		return true;
 	}
 
 	// ===========================================================

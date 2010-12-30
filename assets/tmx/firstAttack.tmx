@@ -6,6 +6,9 @@
  <tileset firstgid="101" name="enemy" tilewidth="24" tileheight="28" spacing="3" margin="2">
   <image source="gfx/enemy.png"/>
  </tileset>
+ <tileset firstgid="104" name="objects" tilewidth="24" tileheight="28" spacing="3" margin="2">
+  <image source="gfx/objects.png"/>
+ </tileset>
  <layer name="Tile Layer 1" width="30" height="20">
   <data encoding="base64" compression="gzip">
    H4sIAAAAAAAAC82UMQ7CMAxFO5QNwQoDnqgQrQSMwAhs3P8+mOFL1lftNiiJGJ5cOZVfYydtm6ZZKG2B6FHTwyC/VTYmIn9UemUInuf42Ye4VlYm4v1vfTEumfCelDNxCbxLwnpT9ntVbsQ9mA974ZaCXswUPjtjr7c5vJgpvHbGqX1+KE/iFfTZuxe2PvdcRry57uMv9yiq553rVK8U8Eb/DdvzEt7cc4P37dAFa72DBGsM19yR95DgTfkO1NoT3Ugu8sqETyjyXlA/Zb/sYcccb6351jzP/xA/9T40OWAJAAA=
@@ -14,4 +17,9 @@
  <objectgroup name="Object Layer 1" width="30" height="20">
   <object name="" x="136" y="187" width="16" height="18"/>
  </objectgroup>
+ <layer name="collidable" width="30" height="20" opacity="0.35">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC2NgGAVDEWTgwPSwlxixUXspt3cg4ncUjIJRMApGAXUAAL7YyytgCQAA
+  </data>
+ </layer>
 </map>
