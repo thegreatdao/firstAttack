@@ -39,8 +39,6 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	// ===========================================================
 	private float mTouchX = 0;
 	private float mTouchY = 0;
-	private float mTouchOffsetX = 0;
-	private float mTouchOffsetY = 0;
 	
 	private static final int CAMERA_WIDTH = 480;
 	private static final int CAMERA_HEIGHT = 320;
@@ -55,6 +53,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private TiledTextureRegion mPlayerTextureRegion;
 	private TMXTiledMap mTMXTiledMap;
 	protected int mCactusCount;
+	private AnimatedSprite player;
 
 	// ===========================================================
 	// Constructors
@@ -121,11 +120,11 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		this.mBoundChaseCamera.setBoundsEnabled(true);
 
 		/* Calculate the coordinates for the face, so its centered on the camera. */
-		final int centerX = (CAMERA_WIDTH - this.mPlayerTextureRegion.getTileWidth()) / 2;
+		/*final int centerX = (CAMERA_WIDTH - this.mPlayerTextureRegion.getTileWidth()) / 2;
 		final int centerY = (CAMERA_HEIGHT - this.mPlayerTextureRegion.getTileHeight()) / 2;
-
+*/
 		/* Create the sprite and add it to the scene. */
-		final AnimatedSprite player = new AnimatedSprite(0, 160, this.mPlayerTextureRegion);
+		player = new AnimatedSprite(0, 160, this.mPlayerTextureRegion);
 //		this.mBoundChaseCamera.setChaseShape(player);
 /*
 		final Path path = new Path(5).to(0, 160).to(0, 500).to(600, 500).to(600, 160).to(0, 160);
@@ -152,6 +151,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 
 		scene.getTopLayer().addEntity(player);
 	    scene.setOnSceneTouchListener(this);
+	    mBoundChaseCamera.setChaseShape(player);
 		return scene;
 	}
 
@@ -163,7 +163,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	@Override
 	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pTouchEvent)
 	{
-		if(pTouchEvent.getAction() == MotionEvent.ACTION_DOWN)
+		/*if(pTouchEvent.getAction() == MotionEvent.ACTION_DOWN)
 		{
 			mTouchX = pTouchEvent.getMotionEvent().getX();
 			mTouchY = pTouchEvent.getMotionEvent().getY();
@@ -183,6 +183,31 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 			
 			mTouchX = newX;
 			mTouchY = newY;
+		}*/
+		if(pTouchEvent.getAction() == MotionEvent.ACTION_DOWN)
+		{
+			mTouchX = pTouchEvent.getMotionEvent().getX();
+			mTouchY = pTouchEvent.getMotionEvent().getY();
+			player.clearShapeModifiers();
+			player.setVelocity(1f);
+			player.addShapeModifier(new LoopShapeModifier(new PathModifier(60, new Path(6).to(mTouchX, mTouchY), null, new IPathModifierListener() {
+				@Override
+				public void onWaypointPassed(final PathModifier pPathModifier, final IShape pShape, final int pWaypointIndex) {
+					switch(pWaypointIndex) {
+						case 0:
+							player.animate(new long[]{100, 100, 100}, 0, 2, true);
+							break;
+						case 1:
+							player.animate(new long[]{100, 100, 100}, 0, 2, true);
+							break;
+						case 2:
+							player.animate(new long[]{100, 100, 100}, 0, 2, true);
+							break;
+						case 3:
+							player.animate(new long[]{100, 100, 100}, 0, 2, true);
+							break;
+					}
+				}})));
 		}
 		return true;
 	}
