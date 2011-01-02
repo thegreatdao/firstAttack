@@ -1,7 +1,12 @@
 package com.emptyyourmind;
 
+import javax.microedition.khronos.opengles.GL10;
+
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.BoundCamera;
+import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
+import org.anddev.andengine.engine.camera.hud.controls.BaseOnScreenControl;
+import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
@@ -15,37 +20,25 @@ import org.anddev.andengine.entity.layer.tiled.tmx.TMXTiledMap;
 import org.anddev.andengine.entity.layer.tiled.tmx.util.exception.TMXLoadException;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
-import org.anddev.andengine.entity.shape.IShape;
-import org.anddev.andengine.entity.shape.modifier.LoopShapeModifier;
-import org.anddev.andengine.entity.shape.modifier.PathModifier;
-import org.anddev.andengine.entity.shape.modifier.PathModifier.IPathModifierListener;
+import org.anddev.andengine.entity.shape.modifier.ScaleModifier;
+import org.anddev.andengine.entity.shape.modifier.SequenceShapeModifier;
 import org.anddev.andengine.entity.sprite.AnimatedSprite;
 import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.Texture;
 import org.anddev.andengine.opengl.texture.TextureOptions;
+import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.Path;
 
 import android.view.MotionEvent;
 
 public class Main extends BaseGameActivity implements IOnSceneTouchListener
 {
-	// ===========================================================
-	// Constants
-	// ===========================================================
-	private float mTouchX = 0;
-	private float mTouchY = 0;
-	
 	private static final int CAMERA_WIDTH = 480;
 	private static final int CAMERA_HEIGHT = 320;
-
-	// ===========================================================
-	// Fields
-	// ===========================================================
 
 	private BoundCamera mBoundChaseCamera;
 
@@ -55,168 +48,154 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	protected int mCactusCount;
 	private AnimatedSprite player;
 
-	// ===========================================================
-	// Constructors
-	// ===========================================================
-
-	// ===========================================================
-	// Getter & Setter
-	// ===========================================================
-
-	// ===========================================================
-	// Methods for/from SuperClass/Interfaces
-	// ===========================================================
+	private Texture mOnScreenControlTexture;
+	private TextureRegion mOnScreenControlBaseTextureRegion;
+	private TextureRegion mOnScreenControlKnobTextureRegion;
 
 	@Override
-	public Engine onLoadEngine() {
-		this.mBoundChaseCamera = new BoundCamera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), this.mBoundChaseCamera));
+	public Engine onLoadEngine()
+	{
+		mBoundChaseCamera = new BoundCamera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE,
+				new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT),
+				mBoundChaseCamera));
 	}
 
 	@Override
-	public void onLoadResources() {
-		this.mTexture = new Texture(128, 128, TextureOptions.DEFAULT);
-		this.mPlayerTextureRegion = TextureRegionFactory.createTiledFromAsset(this.mTexture, this, "gfx/player.png", 0, 0, 3, 1); // 72x128
+	public void onLoadResources()
+	{
+		TextureRegionFactory.setAssetBasePath("gfx/");
+		mTexture = new Texture(128, 128, TextureOptions.DEFAULT);
+		mPlayerTextureRegion = TextureRegionFactory.createTiledFromAsset(
+				mTexture, this, "player.png", 0, 0, 3, 1); // 72x128
 
-		this.mEngine.getTextureManager().loadTexture(this.mTexture);
+		mOnScreenControlTexture = new Texture(256, 128,
+				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+		mOnScreenControlBaseTextureRegion = TextureRegionFactory
+				.createFromAsset(mOnScreenControlTexture, this,
+						"onscreen_control_base.png", 0, 0);
+		mOnScreenControlKnobTextureRegion = TextureRegionFactory
+				.createFromAsset(mOnScreenControlTexture, this,
+						"onscreen_control_knob.png", 128, 0);
+
+		mEngine.getTextureManager().loadTextures(this.mTexture,
+				this.mOnScreenControlTexture);
 	}
 
 	@Override
-	public Scene onLoadScene() {
-		this.mEngine.registerUpdateHandler(new FPSLogger());
+	public Scene onLoadScene()
+	{
+		mEngine.registerUpdateHandler(new FPSLogger());
 
 		final Scene scene = new Scene(2);
 
-		try {
-			final TMXLoader tmxLoader = new TMXLoader(this, this.mEngine.getTextureManager(), TextureOptions.BILINEAR_PREMULTIPLYALPHA, new ITMXTilePropertiesListener() {
-				@Override
-				public void onTMXTileWithPropertiesCreated(final TMXTiledMap pTMXTiledMap, final TMXLayer pTMXLayer, final TMXTile pTMXTile, final TMXProperties<TMXTileProperty> pTMXTileProperties) {
-					/* We are going to count the tiles that have the property "cactus=true" set. */
-					if(pTMXTileProperties.containsTMXProperty("cactus", "true")) {
-						Main.this.mCactusCount++;
-					}
-				}
-			});
-			this.mTMXTiledMap = tmxLoader.loadFromAsset(this, "tmx/firstAttack.tmx");
+		try
+		{
+			final TMXLoader tmxLoader = new TMXLoader(this,
+					mEngine.getTextureManager(),
+					TextureOptions.BILINEAR_PREMULTIPLYALPHA,
+					new ITMXTilePropertiesListener()
+					{
+						@Override
+						public void onTMXTileWithPropertiesCreated(
+								final TMXTiledMap pTMXTiledMap,
+								final TMXLayer pTMXLayer,
+								final TMXTile pTMXTile,
+								final TMXProperties<TMXTileProperty> pTMXTileProperties)
+						{
+							/*
+							 * We are going to count the tiles that have the
+							 * property "cactus=true" set.
+							 */
+							if (pTMXTileProperties.containsTMXProperty(
+									"cactus", "true"))
+							{
+								Main.this.mCactusCount++;
+							}
+						}
+					});
+			mTMXTiledMap = tmxLoader.loadFromAsset(this, "tmx/firstAttack.tmx");
 
-//			Toast.makeText(this, "Cactus count in this TMXTiledMap: " + this.mCactusCount, Toast.LENGTH_LONG).show();
-		} catch (final TMXLoadException tmxle) {
+		} catch (final TMXLoadException tmxle)
+		{
 			Debug.e(tmxle);
 		}
 
-		final TMXLayer tmxLayer = this.mTMXTiledMap.getTMXLayers().get(0);
-		final TMXLayer tmxLayer2 = this.mTMXTiledMap.getTMXLayers().get(1);
-		/*final TMXLayer tmxLayer3 = this.mTMXTiledMap.getTMXLayers().get(2);
-		final TMXLayer tmxLayer4 = this.mTMXTiledMap.getTMXLayers().get(3);
-		TMXObjectGroup tmxObjectGroup = this.mTMXTiledMap.getTMXObjectGroups().get(0);
-		TMXObject tmxObject = tmxObjectGroup.getTMXObjects().get(0);*/
-		scene.getBottomLayer().addEntity(tmxLayer2);
-		/*scene.getBottomLayer().addEntity(tmxLayer3);
-		scene.getBottomLayer().addEntity(tmxLayer4);*/
-
+		final TMXLayer tmxLayer = mTMXTiledMap.getTMXLayers().get(0);
+		final TMXLayer tmxLayer2 = mTMXTiledMap.getTMXLayers().get(1);
+		/*
+		 * final TMXLayer tmxLayer3 = mTMXTiledMap.getTMXLayers().get(2); final
+		 * TMXLayer tmxLayer4 = mTMXTiledMap.getTMXLayers().get(3);
+		 * TMXObjectGroup tmxObjectGroup =
+		 * mTMXTiledMap.getTMXObjectGroups().get(0); TMXObject tmxObject =
+		 * tmxObjectGroup.getTMXObjects().get(0);
+		 */
 		scene.getBottomLayer().addEntity(tmxLayer);
+		scene.getBottomLayer().addEntity(tmxLayer2);
 		/* Make the camera not exceed the bounds of the TMXLayer. */
-		this.mBoundChaseCamera.setBounds(0, tmxLayer.getWidth(), 0, tmxLayer.getHeight());
-		this.mBoundChaseCamera.setBoundsEnabled(true);
+		mBoundChaseCamera.setBounds(0, tmxLayer.getWidth(), 0,
+				tmxLayer.getHeight());
+		mBoundChaseCamera.setBoundsEnabled(true);
 
-		/* Calculate the coordinates for the face, so its centered on the camera. */
-		/*final int centerX = (CAMERA_WIDTH - this.mPlayerTextureRegion.getTileWidth()) / 2;
-		final int centerY = (CAMERA_HEIGHT - this.mPlayerTextureRegion.getTileHeight()) / 2;
-*/
+		/*
+		 * Calculate the coordinates for the face, so its centered on the
+		 * camera.
+		 */
+
+		final int centerX = (CAMERA_WIDTH - mPlayerTextureRegion.getTileWidth()) / 2;
+		final int centerY = (CAMERA_HEIGHT - mPlayerTextureRegion
+				.getTileHeight()) / 2;
+
 		/* Create the sprite and add it to the scene. */
-		player = new AnimatedSprite(0, 160, this.mPlayerTextureRegion);
-//		this.mBoundChaseCamera.setChaseShape(player);
-/*
-		final Path path = new Path(5).to(0, 160).to(0, 500).to(600, 500).to(600, 160).to(0, 160);
-
-		player.addShapeModifier(new LoopShapeModifier(new PathModifier(60, path, null, new IPathModifierListener() {
-			@Override
-			public void onWaypointPassed(final PathModifier pPathModifier, final IShape pShape, final int pWaypointIndex) {
-				switch(pWaypointIndex) {
-					case 0:
-						player.animate(new long[]{100, 100, 100}, 0, 2, true);
-						break;
-					case 1:
-						player.animate(new long[]{100, 100, 100}, 0, 2, true);
-						break;
-					case 2:
-						player.animate(new long[]{100, 100, 100}, 0, 2, true);
-						break;
-					case 3:
-						player.animate(new long[]{100, 100, 100}, 0, 2, true);
-						break;
-				}
-			}
-		})));*/
-
+		player = new AnimatedSprite(centerX, centerY, mPlayerTextureRegion);
+		player.animate(100);
 		scene.getTopLayer().addEntity(player);
-	    scene.setOnSceneTouchListener(this);
-	    mBoundChaseCamera.setChaseShape(player);
+		scene.setOnSceneTouchListener(this);
+		mBoundChaseCamera.setChaseShape(player);
+
+		final AnalogOnScreenControl analogOnScreenControl = new AnalogOnScreenControl(
+				0, CAMERA_HEIGHT - mOnScreenControlBaseTextureRegion.getHeight(), mBoundChaseCamera, mOnScreenControlBaseTextureRegion, mOnScreenControlKnobTextureRegion, 0.1f, 200,
+				new IAnalogOnScreenControlListener()
+				{
+					@Override
+					public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY)
+					{
+						player.setVelocity(pValueX * 60, pValueY * 60);
+					}
+
+					@Override
+					public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl)
+					{
+						player.addShapeModifier(new SequenceShapeModifier(new ScaleModifier(0.25f, 1, 1.5f), new ScaleModifier(0.25f, 1.5f, 1)));
+					}
+				});
+		analogOnScreenControl.getControlBase().setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		analogOnScreenControl.getControlBase().setAlpha(0.5f);
+		analogOnScreenControl.getControlBase().setScaleCenter(0, 128);
+		analogOnScreenControl.getControlBase().setScale(0.75f);
+		analogOnScreenControl.getControlKnob().setScale(0.75f);
+		analogOnScreenControl.refreshControlKnobPosition();
+
+		scene.setChildScene(analogOnScreenControl);
+
 		return scene;
 	}
 
 	@Override
-	public void onLoadComplete() {
+	public void onLoadComplete()
+	{
 
 	}
 
 	@Override
 	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pTouchEvent)
 	{
-		/*if(pTouchEvent.getAction() == MotionEvent.ACTION_DOWN)
+		if (pTouchEvent.getAction() == MotionEvent.ACTION_DOWN)
 		{
-			mTouchX = pTouchEvent.getMotionEvent().getX();
-			mTouchY = pTouchEvent.getMotionEvent().getY();
-		}
-		else if(pTouchEvent.getAction() == MotionEvent.ACTION_MOVE)
-		{
-			float newX = pTouchEvent.getMotionEvent().getX();
-			float newY = pTouchEvent.getMotionEvent().getY();
-			
-			mTouchOffsetX = (newX - mTouchX);
-			mTouchOffsetY = (newY - mTouchY);
-			
-			float newScrollX = this.mBoundChaseCamera.getCenterX() - mTouchOffsetX;
-			float newScrollY = this.mBoundChaseCamera.getCenterY() - mTouchOffsetY;
-			
-			this.mBoundChaseCamera.setCenter(newScrollX, newScrollY);
-			
-			mTouchX = newX;
-			mTouchY = newY;
-		}*/
-		if(pTouchEvent.getAction() == MotionEvent.ACTION_DOWN)
-		{
-			mTouchX = pTouchEvent.getMotionEvent().getX();
-			mTouchY = pTouchEvent.getMotionEvent().getY();
-			player.clearShapeModifiers();
-			player.setVelocity(1f);
-			player.addShapeModifier(new LoopShapeModifier(new PathModifier(60, new Path(6).to(mTouchX, mTouchY), null, new IPathModifierListener() {
-				@Override
-				public void onWaypointPassed(final PathModifier pPathModifier, final IShape pShape, final int pWaypointIndex) {
-					switch(pWaypointIndex) {
-						case 0:
-							player.animate(new long[]{100, 100, 100}, 0, 2, true);
-							break;
-						case 1:
-							player.animate(new long[]{100, 100, 100}, 0, 2, true);
-							break;
-						case 2:
-							player.animate(new long[]{100, 100, 100}, 0, 2, true);
-							break;
-						case 3:
-							player.animate(new long[]{100, 100, 100}, 0, 2, true);
-							break;
-					}
-				}})));
+			pTouchEvent.getMotionEvent().getX();
+			pTouchEvent.getMotionEvent().getY();
 		}
 		return true;
 	}
 
-	// ===========================================================
-	// Methods
-	// ===========================================================
-
-	// ===========================================================
-	// Inner and Anonymous Classes
-	// ===========================================================
 }
