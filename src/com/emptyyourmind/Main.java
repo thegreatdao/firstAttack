@@ -39,6 +39,8 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 {
 	private static final int CAMERA_WIDTH = 480;
 	private static final int CAMERA_HEIGHT = 320;
+	private int mapWidth;
+	private int mapHeight;
 
 	private BoundCamera mBoundChaseCamera;
 
@@ -133,9 +135,10 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		scene.getBottomLayer().addEntity(tmxLayer);
 		scene.getBottomLayer().addEntity(tmxLayer2);
 		/* Make the camera not exceed the bounds of the TMXLayer. */
-		mBoundChaseCamera.setBounds(0, tmxLayer.getWidth(), 0,
-				tmxLayer.getHeight());
+		mBoundChaseCamera.setBounds(0, tmxLayer.getWidth(), 0, tmxLayer.getHeight());		
 		mBoundChaseCamera.setBoundsEnabled(true);
+		mapWidth = (int)tmxLayer.getWidth();
+		mapHeight = (int)tmxLayer.getHeight();
 
 		/*
 		 * Calculate the coordinates for the face, so its centered on the
@@ -160,7 +163,14 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 					@Override
 					public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY)
 					{
-						player.setVelocity(pValueX * 60, pValueY * 60);
+						float x = player.getX();
+						float y = player.getY();
+						float speed = pValueX;
+						if(x + player.getWidth() >= mapWidth && pValueX > 0)
+						{
+							speed = 0;
+						}
+						player.setVelocity(speed * 60, pValueY * 60);
 					}
 
 					@Override
