@@ -5,8 +5,8 @@ import javax.microedition.khronos.opengles.GL10;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.BoundCamera;
 import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
-import org.anddev.andengine.engine.camera.hud.controls.BaseOnScreenControl;
 import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
+import org.anddev.andengine.engine.camera.hud.controls.BaseOnScreenControl;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
@@ -22,7 +22,6 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
 import org.anddev.andengine.entity.shape.modifier.ScaleModifier;
 import org.anddev.andengine.entity.shape.modifier.SequenceShapeModifier;
-import org.anddev.andengine.entity.sprite.AnimatedSprite;
 import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.Texture;
@@ -35,12 +34,19 @@ import org.anddev.andengine.util.Debug;
 
 import android.view.MotionEvent;
 
+import com.emptyyourmind.entity.Player;
+
+
 public class Main extends BaseGameActivity implements IOnSceneTouchListener
 {
 	private static final int CAMERA_WIDTH = 480;
 	private static final int CAMERA_HEIGHT = 320;
 	private int mapWidth;
 	private int mapHeight;
+	private boolean headingPositiveX;
+	private boolean headingPositiveY;
+	private boolean reachHorizontalBoundary;
+	private boolean reachVerticalBoundary;
 
 	private BoundCamera mBoundChaseCamera;
 
@@ -48,7 +54,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private TiledTextureRegion mPlayerTextureRegion;
 	private TMXTiledMap mTMXTiledMap;
 	protected int mCactusCount;
-	private AnimatedSprite player;
+	private Player player;
 
 	private Texture mOnScreenControlTexture;
 	private TextureRegion mOnScreenControlBaseTextureRegion;
@@ -146,11 +152,61 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		 */
 
 		final int centerX = (CAMERA_WIDTH - mPlayerTextureRegion.getTileWidth()) / 2;
-		final int centerY = (CAMERA_HEIGHT - mPlayerTextureRegion
-				.getTileHeight()) / 2;
+		final int centerY = (CAMERA_HEIGHT - mPlayerTextureRegion.getTileHeight()) / 2;
 
 		/* Create the sprite and add it to the scene. */
-		player = new AnimatedSprite(centerX, centerY, mPlayerTextureRegion);
+		player = new Player(centerX, centerY, mPlayerTextureRegion, new com.emptyyourmind.entity.Player.IPositionChangedListener()
+		{
+			
+			@Override
+			public void onPositionChanged(float posX, float posY)
+			{
+				if(headingPositiveX)
+				{
+					if(posX + mPlayerTextureRegion.getTileWidth() >= mapWidth)
+					{
+						reachHorizontalBoundary = true;
+					}
+					else
+					{
+						reachHorizontalBoundary = false;
+					}
+				}
+				else
+				{
+					if(posX <= 0)
+					{
+						reachHorizontalBoundary = true;
+					}
+					else
+					{
+						reachHorizontalBoundary = false;
+					}
+				}
+				if(headingPositiveY)
+				{
+					if(posY + mPlayerTextureRegion.getTileHeight() >= mapHeight)
+					{
+						reachVerticalBoundary = true;
+					}
+					else
+					{
+						reachVerticalBoundary = false;
+					}
+				}
+				else
+				{
+					if(posY <= 0)
+					{
+						reachVerticalBoundary = true;
+					}
+					else
+					{
+						reachVerticalBoundary = false;
+					}
+				}
+			}
+		});
 		player.animate(100);
 		scene.getTopLayer().addEntity(player);
 		scene.setOnSceneTouchListener(this);
@@ -163,14 +219,33 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 					@Override
 					public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY)
 					{
-						float x = player.getX();
-						float y = player.getY();
-						float speed = pValueX;
-						if(x + player.getWidth() >= mapWidth && pValueX > 0)
+						if(pValueX > 0)
 						{
-							speed = 0;
+							headingPositiveX = true;
 						}
-						player.setVelocity(speed * 60, pValueY * 60);
+						else
+						{
+							headingPositiveX = false;
+						}
+						if(pValueY > 0)
+						{
+							headingPositiveY = true;
+						}
+						else
+						{
+							headingPositiveY = false;
+						}
+						float xValue = pValueX;
+						float yValue = pValueY;
+						if(reachHorizontalBoundary)
+						{
+							xValue = 0;
+						}
+						if(reachVerticalBoundary)
+						{
+							yValue = 0;
+						}
+						player.setVelocity(xValue * 60, yValue * 60);
 					}
 
 					@Override

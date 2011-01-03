@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="30" height="20" tilewidth="24" tileheight="28">
  <tileset firstgid="1" name="secondLevel" tilewidth="24" tileheight="28" spacing="3" margin="2">
-  <image source="../gfx/secondLevel.png"/>
+  <image source="gfx/secondLevel.png"/>
  </tileset>
  <tileset firstgid="101" name="enemy" tilewidth="24" tileheight="28" spacing="3" margin="2">
-  <image source="../gfx/enemy.png"/>
+  <image source="gfx/enemy.png"/>
  </tileset>
  <tileset firstgid="104" name="objects" tilewidth="24" tileheight="28" spacing="3" margin="2">
-  <image source="../gfx/objects.png"/>
+  <image source="gfx/objects.png"/>
  </tileset>
  <layer name="Tile Layer 1" width="30" height="20">
   <data encoding="base64" compression="gzip">
