@@ -5,24 +5,29 @@ import javax.microedition.khronos.opengles.GL10;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.BoundCamera;
 import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
-import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
 import org.anddev.andengine.engine.camera.hud.controls.BaseOnScreenControl;
+import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.anddev.andengine.entity.layer.ILayer;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLayer;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader.ITMXTilePropertiesListener;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXProperties;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTile;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTileProperty;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTiledMap;
+import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader.ITMXTilePropertiesListener;
 import org.anddev.andengine.entity.layer.tiled.tmx.util.exception.TMXLoadException;
+import org.anddev.andengine.entity.primitive.Line;
+import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
-import org.anddev.andengine.entity.shape.modifier.ScaleModifier;
-import org.anddev.andengine.entity.shape.modifier.SequenceShapeModifier;
-import org.anddev.andengine.entity.util.FPSLogger;
+import org.anddev.andengine.entity.shape.Shape;
+import org.anddev.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
+import org.anddev.andengine.extension.physics.box2d.PhysicsConnector;
+import org.anddev.andengine.extension.physics.box2d.PhysicsFactory;
+import org.anddev.andengine.extension.physics.box2d.PhysicsWorld;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.Texture;
 import org.anddev.andengine.opengl.texture.TextureOptions;
@@ -34,6 +39,10 @@ import org.anddev.andengine.util.Debug;
 
 import android.view.MotionEvent;
 
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.emptyyourmind.entity.Player;
 
 
@@ -43,19 +52,18 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private static final int CAMERA_HEIGHT = 320;
 	private int mapWidth;
 	private int mapHeight;
-	private boolean headingPositiveX;
-	private boolean headingPositiveY;
-	private boolean reachHorizontalBoundary;
-	private boolean reachVerticalBoundary;
 
 	private BoundCamera mBoundChaseCamera;
+
+	private PhysicsWorld physicsWorld;
 
 	private Texture mTexture;
 	private TiledTextureRegion mPlayerTextureRegion;
 	private TMXTiledMap mTMXTiledMap;
 	protected int mCactusCount;
 	private Player player;
-
+	private Body playerBody;
+	
 	private Texture mOnScreenControlTexture;
 	private TextureRegion mOnScreenControlBaseTextureRegion;
 	private TextureRegion mOnScreenControlKnobTextureRegion;
@@ -93,10 +101,9 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	@Override
 	public Scene onLoadScene()
 	{
-		mEngine.registerUpdateHandler(new FPSLogger());
+		final Scene scene = new Scene(3);
 
-		final Scene scene = new Scene(2);
-
+		physicsWorld = new FixedStepPhysicsWorld(30, new Vector2(0, 0), false, 8, 1);
 		try
 		{
 			final TMXLoader tmxLoader = new TMXLoader(this,
@@ -157,57 +164,19 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		/* Create the sprite and add it to the scene. */
 		player = new Player(centerX, centerY, mPlayerTextureRegion, new com.emptyyourmind.entity.Player.IPositionChangedListener()
 		{
-			
 			@Override
 			public void onPositionChanged(float posX, float posY)
 			{
-				if(headingPositiveX)
-				{
-					if(posX + mPlayerTextureRegion.getTileWidth() >= mapWidth)
-					{
-						reachHorizontalBoundary = true;
-					}
-					else
-					{
-						reachHorizontalBoundary = false;
-					}
-				}
-				else
-				{
-					if(posX <= 0)
-					{
-						reachHorizontalBoundary = true;
-					}
-					else
-					{
-						reachHorizontalBoundary = false;
-					}
-				}
-				if(headingPositiveY)
-				{
-					if(posY + mPlayerTextureRegion.getTileHeight() >= mapHeight)
-					{
-						reachVerticalBoundary = true;
-					}
-					else
-					{
-						reachVerticalBoundary = false;
-					}
-				}
-				else
-				{
-					if(posY <= 0)
-					{
-						reachVerticalBoundary = true;
-					}
-					else
-					{
-						reachVerticalBoundary = false;
-					}
-				}
 			}
 		});
 		player.animate(100);
+		player.setUpdatePhysics(false);
+		final FixtureDef carFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
+		playerBody = PhysicsFactory.createBoxBody(physicsWorld, player, BodyType.DynamicBody, carFixtureDef);
+		
+		physicsWorld.registerPhysicsConnector(new PhysicsConnector(player, playerBody, true, false, true, false));
+		
+		setBorder(scene);
 		scene.getTopLayer().addEntity(player);
 		scene.setOnSceneTouchListener(this);
 		mBoundChaseCamera.setChaseShape(player);
@@ -216,42 +185,25 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 				0, CAMERA_HEIGHT - mOnScreenControlBaseTextureRegion.getHeight(), mBoundChaseCamera, mOnScreenControlBaseTextureRegion, mOnScreenControlKnobTextureRegion, 0.1f, 200,
 				new IAnalogOnScreenControlListener()
 				{
+					private Vector2 mVelocityTemp = new Vector2();
 					@Override
 					public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY)
 					{
-						if(pValueX > 0)
-						{
-							headingPositiveX = true;
-						}
-						else
-						{
-							headingPositiveX = false;
-						}
-						if(pValueY > 0)
-						{
-							headingPositiveY = true;
-						}
-						else
-						{
-							headingPositiveY = false;
-						}
-						float xValue = pValueX;
-						float yValue = pValueY;
-						if(reachHorizontalBoundary)
-						{
-							xValue = 0;
-						}
-						if(reachVerticalBoundary)
-						{
-							yValue = 0;
-						}
-						player.setVelocity(xValue * 60, yValue * 60);
+						this.mVelocityTemp.set(pValueX * 1, pValueY * 1);
+						
+						final Body carBody = Main.this.playerBody;
+						carBody.setLinearVelocity(this.mVelocityTemp);
+						
+						/*final float rotationInRad = (float)Math.atan2(-pValueX, pValueY);
+						carBody.setTransform(carBody.getWorldCenter(), rotationInRad);
+						
+						Main.this.player.setRotation(MathUtils.radToDeg(rotationInRad));*/
 					}
 
 					@Override
 					public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl)
 					{
-						player.addShapeModifier(new SequenceShapeModifier(new ScaleModifier(0.25f, 1, 1.5f), new ScaleModifier(0.25f, 1.5f, 1)));
+//						player.addShapeModifier(new SequenceShapeModifier(new ScaleModifier(0.25f, 1, 1.5f), new ScaleModifier(0.25f, 1.5f, 1)));
 					}
 				});
 		analogOnScreenControl.getControlBase().setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
@@ -262,6 +214,8 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		analogOnScreenControl.refreshControlKnobPosition();
 
 		scene.setChildScene(analogOnScreenControl);
+		drawSystem(scene);
+		scene.registerUpdateHandler(physicsWorld);
 
 		return scene;
 	}
@@ -283,4 +237,56 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		return true;
 	}
 
+	private void drawSystem(Scene scene)
+	{
+		int count = mapHeight / 28;
+		
+		for(int i = 0; i < count; i++) {
+			final float x1 = 0;
+			final float x2 = mapWidth;
+			final float y1 = i * 28;
+			final float y2 = i * 28;
+			final float lineWidth = 1;
+
+			final Line line = new Line(x1, y1, x2, y2, lineWidth);
+
+			line.setColor(1, 1, 1, 0.1f);
+
+			scene.getTopLayer().addEntity(line);
+		}
+		
+		count = mapWidth / 24;
+		for(int i = 0; i < count; i++) {
+			final float x1 = i * 24;
+			final float x2 = i * 24;
+			final float y1 = 0;
+			final float y2 = mapHeight;
+			final float lineWidth = 1;
+
+			final Line line = new Line(x1, y1, x2, y2, lineWidth);
+
+			line.setColor(1, 1, 1, 0.1f);
+
+			scene.getTopLayer().addEntity(line);
+		}
+	}
+	
+	private void setBorder(final Scene pScene) {
+		final Shape bottom = new Rectangle(-1, mapHeight + 1, mapWidth, 1);
+		final Shape top = new Rectangle(-1, -1, mapWidth, 1);
+		final Shape left = new Rectangle(-1, -1, 1, mapHeight);
+		final Shape right = new Rectangle(mapWidth+1, -1, 1, mapHeight);
+
+		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
+		PhysicsFactory.createBoxBody(physicsWorld, bottom, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(physicsWorld, top, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(physicsWorld, left, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(physicsWorld, right, BodyType.StaticBody, wallFixtureDef);
+
+		final ILayer bottomLayer = pScene.getLayer(2);
+		bottomLayer.addEntity(bottom);
+		bottomLayer.addEntity(top);
+		bottomLayer.addEntity(left);
+		bottomLayer.addEntity(right);
+	}
 }
