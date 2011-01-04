@@ -1,7 +1,11 @@
 package com.emptyyourmind;
 
+import java.io.IOException;
+
 import javax.microedition.khronos.opengles.GL10;
 
+import org.anddev.andengine.audio.sound.Sound;
+import org.anddev.andengine.audio.sound.SoundFactory;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.BoundCamera;
 import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
@@ -37,13 +41,13 @@ import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 import org.anddev.andengine.util.Debug;
 
-import android.view.MotionEvent;
-
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-import com.emptyyourmind.entity.Player;
+import com.emptyyourmind.entity.CustomizedAnimatedSprite;
+import com.emptyyourmind.entity.CustomizedSprite;
+import com.emptyyourmind.entity.IPositionChangedListener;
 
 
 public class Main extends BaseGameActivity implements IOnSceneTouchListener
@@ -52,38 +56,45 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private static final int CAMERA_HEIGHT = 320;
 	private int mapWidth;
 	private int mapHeight;
+	private Sound explosionSound;
 
 	private BoundCamera mBoundChaseCamera;
 
 	private PhysicsWorld physicsWorld;
 
-	private Texture mTexture;
+	private Texture playerTexture;
 	private TiledTextureRegion mPlayerTextureRegion;
 	private TMXTiledMap mTMXTiledMap;
 	protected int mCactusCount;
-	private Player player;
+	private CustomizedAnimatedSprite player;
 	private Body playerBody;
 	
 	private Texture mOnScreenControlTexture;
 	private TextureRegion mOnScreenControlBaseTextureRegion;
 	private TextureRegion mOnScreenControlKnobTextureRegion;
-
+	private TextureRegion mBulletTextureRegion;
+	private Texture bulletTexture;
+	private Scene scene;
+	private long currentTimeInmillis;
+	private static final int SHOT_TIME_INTERVAL = 1500;
 	@Override
 	public Engine onLoadEngine()
 	{
 		mBoundChaseCamera = new BoundCamera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE,
 				new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT),
-				mBoundChaseCamera));
+				mBoundChaseCamera).setNeedsSound(true));
 	}
 
 	@Override
 	public void onLoadResources()
 	{
 		TextureRegionFactory.setAssetBasePath("gfx/");
-		mTexture = new Texture(128, 128, TextureOptions.DEFAULT);
+		playerTexture = new Texture(128, 128, TextureOptions.DEFAULT);
 		mPlayerTextureRegion = TextureRegionFactory.createTiledFromAsset(
-				mTexture, this, "player.png", 0, 0, 3, 1); // 72x128
+				playerTexture, this, "player.png", 0, 0, 3, 1); // 72x128
+		bulletTexture = new Texture(8, 8, TextureOptions.BILINEAR);
+		mBulletTextureRegion = TextureRegionFactory.createFromAsset(bulletTexture, this, "bullet.png", 0, 0);
 
 		mOnScreenControlTexture = new Texture(256, 128,
 				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
@@ -94,15 +105,20 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 				.createFromAsset(mOnScreenControlTexture, this,
 						"onscreen_control_knob.png", 128, 0);
 
-		mEngine.getTextureManager().loadTextures(this.mTexture,
-				this.mOnScreenControlTexture);
+		mEngine.getTextureManager().loadTextures(playerTexture, bulletTexture, mOnScreenControlTexture);
+		
+		SoundFactory.setAssetBasePath("mfx/");
+		try {
+			this.explosionSound = SoundFactory.createSoundFromAsset(this.mEngine.getSoundManager(), this, "explosion.ogg");
+		} catch (final IOException e) {
+			Debug.e("Error", e);
+		}
 	}
 
 	@Override
 	public Scene onLoadScene()
 	{
-		final Scene scene = new Scene(3);
-
+		scene = new Scene(4);
 		physicsWorld = new FixedStepPhysicsWorld(30, new Vector2(0, 0), false, 8, 1);
 		try
 		{
@@ -162,7 +178,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		final int centerY = (CAMERA_HEIGHT - mPlayerTextureRegion.getTileHeight()) / 2;
 
 		/* Create the sprite and add it to the scene. */
-		player = new Player(centerX, centerY, mPlayerTextureRegion, new com.emptyyourmind.entity.Player.IPositionChangedListener()
+		player = new CustomizedAnimatedSprite(centerX, centerY, mPlayerTextureRegion, new IPositionChangedListener()
 		{
 			@Override
 			public void onPositionChanged(float posX, float posY)
@@ -170,6 +186,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 			}
 		});
 		player.animate(100);
+		scene.getTopLayer().addEntity(player);
 		player.setUpdatePhysics(false);
 		final FixtureDef carFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
 		playerBody = PhysicsFactory.createBoxBody(physicsWorld, player, BodyType.DynamicBody, carFixtureDef);
@@ -177,7 +194,6 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		physicsWorld.registerPhysicsConnector(new PhysicsConnector(player, playerBody, true, false, true, false));
 		
 		setBorder(scene);
-		scene.getTopLayer().addEntity(player);
 		scene.setOnSceneTouchListener(this);
 		mBoundChaseCamera.setChaseShape(player);
 
@@ -189,21 +205,15 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 					@Override
 					public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY)
 					{
-						this.mVelocityTemp.set(pValueX * 1, pValueY * 1);
+						this.mVelocityTemp.set(pValueX * 2, pValueY * 3);
 						
 						final Body carBody = Main.this.playerBody;
 						carBody.setLinearVelocity(this.mVelocityTemp);
 						
-						/*final float rotationInRad = (float)Math.atan2(-pValueX, pValueY);
-						carBody.setTransform(carBody.getWorldCenter(), rotationInRad);
-						
-						Main.this.player.setRotation(MathUtils.radToDeg(rotationInRad));*/
 					}
-
 					@Override
 					public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl)
 					{
-//						player.addShapeModifier(new SequenceShapeModifier(new ScaleModifier(0.25f, 1, 1.5f), new ScaleModifier(0.25f, 1.5f, 1)));
 					}
 				});
 		analogOnScreenControl.getControlBase().setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
@@ -214,7 +224,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		analogOnScreenControl.refreshControlKnobPosition();
 
 		scene.setChildScene(analogOnScreenControl);
-		drawSystem(scene);
+//		drawSystem(scene);
 		scene.registerUpdateHandler(physicsWorld);
 
 		return scene;
@@ -229,14 +239,25 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	@Override
 	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pTouchEvent)
 	{
-		if (pTouchEvent.getAction() == MotionEvent.ACTION_DOWN)
+		if (pTouchEvent.getAction() == TouchEvent.ACTION_DOWN)
 		{
-			pTouchEvent.getMotionEvent().getX();
-			pTouchEvent.getMotionEvent().getY();
+			long now = System.currentTimeMillis();
+			if(currentTimeInmillis ==0)
+			{
+				currentTimeInmillis = now;
+			}
+			if(now - currentTimeInmillis >= SHOT_TIME_INTERVAL)
+			{
+				
+				shotBullets(player, pScene);
+				explosionSound.play();
+				currentTimeInmillis = now;
+			}
 		}
 		return true;
 	}
 
+	@SuppressWarnings("unused")
 	private void drawSystem(Scene scene)
 	{
 		int count = mapHeight / 28;
@@ -248,11 +269,17 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 			final float y2 = i * 28;
 			final float lineWidth = 1;
 
-			final Line line = new Line(x1, y1, x2, y2, lineWidth);
+			final Line line = new Line(x1, y1-1, x2, y2-1, lineWidth);
+			final Line line2 = new Line(x1, y1, x2, y2, lineWidth);
+			final Line line3 = new Line(x1, y1+1, x2, y2+1, lineWidth);
 
-			line.setColor(1, 1, 1, 0.1f);
+			line.setColor(0.2f, 0.5f, 0.9f, 0.5f);
+			line2.setColor(1, 1, 1, 0.5f);
+			line3.setColor(0.2f, 0.5f, 0.9f, 0.5f);
 
-			scene.getTopLayer().addEntity(line);
+			scene.getLayer(2).addEntity(line);
+			scene.getLayer(2).addEntity(line2);
+			scene.getLayer(2).addEntity(line3);
 		}
 		
 		count = mapWidth / 24;
@@ -263,11 +290,17 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 			final float y2 = mapHeight;
 			final float lineWidth = 1;
 
-			final Line line = new Line(x1, y1, x2, y2, lineWidth);
+			final Line line = new Line(x1-1, y1, x2-1, y2, lineWidth);
+			final Line line2 = new Line(x1, y1, x2, y2, lineWidth);
+			final Line line3 = new Line(x1+1, y1, x2+1, y2, lineWidth);
 
-			line.setColor(1, 1, 1, 0.1f);
+			line.setColor(0.2f, 0.5f, 0.9f, 0.5f);
+			line2.setColor(1, 1, 1, 0.5f);
+			line3.setColor(0.2f, 0.5f, 0.9f, 0.5f);
 
-			scene.getTopLayer().addEntity(line);
+			scene.getLayer(2).addEntity(line);
+			scene.getLayer(2).addEntity(line2);
+			scene.getLayer(2).addEntity(line3);
 		}
 	}
 	
@@ -289,4 +322,50 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		bottomLayer.addEntity(left);
 		bottomLayer.addEntity(right);
 	}
+	
+	private CustomizedSprite createBullet(float x, float y)
+	{
+		final CustomizedSprite bullet = new CustomizedSprite(x, y, mBulletTextureRegion);
+		IPositionChangedListener iPositionChangedListener = new IPositionChangedListener()
+		{
+			
+			@Override
+			public void onPositionChanged(float posX, float posY)
+			{
+				if(posX <=0 || posX >= mapWidth)
+				{
+					bullet.setVelocity(-bullet.getVelocityX(), bullet.getVelocityY());
+				}
+				if(posY <=0 || posY >= mapHeight)
+				{
+					bullet.setVelocity(bullet.getVelocityX(), -bullet.getVelocityY());
+				}
+			}
+		};
+		bullet.setiPositionChangedListener(iPositionChangedListener);
+		return bullet;
+	}
+	
+	private void shotBullets(CustomizedAnimatedSprite ship, Scene scene)
+	{
+		float width = ship.getWidth();
+		float height = ship.getHeight();
+		float x = ship.getX();
+		float y = ship.getY();
+		CustomizedSprite upBullet = createBullet(x + width / 2, y);
+		upBullet.setVelocity(0, -10);
+		scene.getTopLayer().addEntity(upBullet);
+		CustomizedSprite downBullet = createBullet(x + width / 2, y + height);
+		downBullet.setVelocity(0, 10);
+		scene.getTopLayer().addEntity(downBullet);
+		CustomizedSprite rightBullet = createBullet(x + width, y + height / 2);
+		rightBullet.setVelocity(10, 0);
+		scene.getTopLayer().addEntity(rightBullet);
+		CustomizedSprite leftBullet = createBullet(x, y + height / 2);
+		leftBullet.setVelocity(-10, 0);
+		scene.getTopLayer().addEntity(leftBullet);
+		
+		
+	}
+	
 }
