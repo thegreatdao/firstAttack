@@ -11,13 +11,13 @@
  </tileset>
  <layer name="Tile Layer 1" width="30" height="20">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC8WV20rDQBCGV02sUA9XVkUsigfQaG3FC217pfFN8v7P4B/MwM+4M9ksHi4+ZtpZ+Oe0mzKEUILCsLfgDlSOz+efIiy7eEHnNsCmwdZA3cLRLRVjsAtOwDHZ9r+9H6y3VOdE9wDsk83VXRCrDk83huhODd3pAF29Nym6OfWuEnR5pjzr39blmfKsPd3G0H0DH+CdqLv4DDyCOTgEE4OjjHo9+wJew/f7HENrXTi6XA/7Epde1Bm62m+Metjnd0Xuk5Wjficbw+d6uR72Y7pWjrnvs2dZt81Ldo593WfhTP1uOR/IZU+fW+7Bs4POQbhxYlVPnwXJRzNX/bg2dK6UrRL6LDuwDl/fFrbLyBxS6+27R7ynmjphDjEewDYY/TE74PSf+ARB5EPeYAkAAA==
+   H4sIAAAAAAAAC8WVUU/CMBSFJ25CosKTIiESCUqCQ0XCgxCe3Pwn+/+/wdNkN7me9HYdRHj4ctuu2+m5t2uzJEkykBpxAV5BHmjze024eRegY3DZUtfxDj7AytPPFNfgBozAg4pu7PYAv19gC3b1mO7reaI7AH0VT6XrQ3Qnhu7kn3Xb+v2M1NU11bU+RndL+HR1TXWtQ7qVofsNfkChcP0y+bu378C9wfAAv6HItQ/BWtOArvbD/21a56KovbfV5XZl+PHtJ/GeBdbI52RltLVf7UfqXBq61hqPOZ+tqHV5jZx/+b7wSH3HU0tmDXl2LMEmAK9BmAee5Q155juGWVE+XgydZ4p5RJ5lD+zBmuLOU4dYvzH3tOxNpoyog483cAW6J6YHxmfiF/M5IgFgCQAA
   </data>
  </layer>
  <objectgroup name="Object Layer 1" width="30" height="20">
-  <object name="playerSpawnPoint" x="200" y="300" width="16" height="18"/>
+  <object name="playerSpawnPoint" x="484" y="282" width="16" height="18"/>
  </objectgroup>
- <layer name="collidable" width="30" height="20" opacity="0.16">
+ <layer name="collidable" width="30" height="20" opacity="0">
   <data encoding="base64" compression="gzip">
    H4sIAAAAAAAAC2NgoC7IIFKM2mDU3lF7h5u92DC6HD0BrezF51da24vNfnLcSKq9xJo1EtP9YLUXV7xR4j5izKOFvZS4jd7lzlAGAHSUZV5gCQAA
   </data>

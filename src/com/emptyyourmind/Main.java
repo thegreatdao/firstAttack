@@ -62,7 +62,9 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private static final int CAMERA_HEIGHT = 320;
 	private int mapWidth;
 	private int mapHeight;
+	@SuppressWarnings("unused")
 	private Sound explosionSound;
+	@SuppressWarnings("unused")
 	private Music backgourndMusic;
 
 	private BoundCamera mBoundChaseCamera;
@@ -103,11 +105,11 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	public void onLoadResources()
 	{
 		TextureRegionFactory.setAssetBasePath("gfx/");
-		playerTexture = new Texture(128, 128, TextureOptions.DEFAULT);
+		playerTexture = new Texture(64, 32, TextureOptions.DEFAULT);
 		mPlayerTextureRegion = TextureRegionFactory.createTiledFromAsset(
 				playerTexture, this, "player.png", 0, 0, 3, 1); // 72x128
-		bulletTexture = new Texture(8, 8, TextureOptions.BILINEAR);
-		mBulletTextureRegion = TextureRegionFactory.createFromAsset(bulletTexture, this, "bullet.png", 0, 0);
+		bulletTexture = new Texture(16, 32, TextureOptions.BILINEAR);
+		mBulletTextureRegion = TextureRegionFactory.createFromAsset(bulletTexture, this, "bullet2.png", 0, 0);
 
 		mOnScreenControlTexture = new Texture(256, 128,
 				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
@@ -129,8 +131,8 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		try {
 			this.explosionSound = SoundFactory.createSoundFromAsset(this.mEngine.getSoundManager(), this, "explosion.ogg");
 			this.backgourndMusic= MusicFactory.createMusicFromAsset(this.mEngine.getMusicManager(), this, "bg.ogg");
-			backgourndMusic.setLooping(true);
-			backgourndMusic.play();
+		/*	backgourndMusic.setLooping(true);
+			backgourndMusic.play();*/
 		} catch (final IOException e) {
 			Debug.e("Error", e);
 		}
@@ -208,7 +210,6 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		player.animate(100);
 		scene.getTopLayer().addEntity(player);
 		player.setUpdatePhysics(false);
-		
 		AnimatedSprite mine = new AnimatedSprite(100, 100, mineTextureRegion);
 		mine.animate(200);
 		scene.getTopLayer().addEntity(mine);
@@ -265,7 +266,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	}
 
 	@Override
-	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pTouchEvent)
+	public boolean onSceneTouchEvent(final Scene pScene, TouchEvent pTouchEvent)
 	{
 		if (pTouchEvent.getAction() == TouchEvent.ACTION_DOWN)
 		{
@@ -276,9 +277,8 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 			}
 			if(now - currentTimeInmillis >= SHOT_TIME_INTERVAL)
 			{
-				
-				shotBullets(player, pScene.getTopLayer(), 100, 100);
-				explosionSound.play();
+				shotBaisicBullets(player, pScene.getTopLayer(), 100, 100);
+//				explosionSound.play();
 				currentTimeInmillis = now;
 			}
 		}
@@ -378,24 +378,24 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		return bullet;
 	}
 	
-	private void shotBullets(CustomizedAnimatedSprite ship, ILayer layer, float xVelocity, float yVelocity)
+	private void shotBaisicBullets(CustomizedAnimatedSprite ship, ILayer layer, float xVelocity, float yVelocity)
 	{
 		float width = ship.getWidth();
 		float height = ship.getHeight();
 		float x = ship.getX();
 		float y = ship.getY();
-		CustomizedSprite upBullet = createBullet(x + width / 2, y, layer);
+		CustomizedSprite upBullet = createBullet(x + width / 2 - 2, y, layer);
 		upBullet.setVelocity(0, -yVelocity);
 		layer.addEntity(upBullet);
-		CustomizedSprite downBullet = createBullet(x + width / 2, y + height, layer);
+/*		CustomizedSprite downBullet = createBullet(x + width / 2 -2, y - 2 + height, layer);
 		downBullet.setVelocity(0, yVelocity);
 		layer.addEntity(downBullet);
-		CustomizedSprite rightBullet = createBullet(x + width, y + height / 2, layer);
+		CustomizedSprite rightBullet = createBullet(x + width, y + height / 2 - 2, layer);
 		rightBullet.setVelocity(xVelocity, 0);
 		layer.addEntity(rightBullet);
-		CustomizedSprite leftBullet = createBullet(x, y + height / 2, layer);
+		CustomizedSprite leftBullet = createBullet(x - 2, y + height / 2 - 2, layer);
 		leftBullet.setVelocity(-xVelocity, 0);
-		layer.addEntity(leftBullet);
+		layer.addEntity(leftBullet);*/
 	}
 	
 }
