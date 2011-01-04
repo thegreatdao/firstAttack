@@ -11,7 +11,7 @@
  </tileset>
  <layer name="Tile Layer 1" width="30" height="20">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC7WV20oDMRCGs3Zz1YMoaluqi+IBtPZIL6q90/om+/7P4AQy8HeYyR7oXnzMLAl8/TPprnfOeSI36jvxQcwTPe7fKnzH9Rz2BTLiQtBr4c0TXq/QJ6bEBOrwzHm92MfeS2IEdRj3NPVugEMk5R0I0FsY3qKBV96bOt42eQ8VXpwtO3HGXXp5puzFGVuu0vD+EH/EL3CM60tiRayJW+LOYNwib6ruia+Yv+dO/9NMZsz3KeHFPNjzOp/FMZ6pfGcEbgyv7EsjD/b4XuG7PFXON9ypa3f63iiNHvNiHuw1b7g7I8gZ8vcV7znmK71XAvbiOTMP4jnw2JDn6JXnjN5PYpdA/gbmLbE2V7Iy7NXQvpOBV8PzImodr/b9QuQcusjrleeqOWgsKrx172mbOjO479j7D5rAN3ZgCQAA
+   H4sIAAAAAAAAC8WV20rEMBCGo7ZXrgcEdRdxUTyA1nUPeKG7Xml9k77/M/gXO/AzZqZpcPHiY6ZN4J9TkjKEUILCsA/gEVSOz/tXEdbdekH7dsCuwd5A3cLRLRX7YAQmYEy2/Xfwh/mWap/oHoFDsrm6S2LT4enGEN2poTsdoKvnJkU3J99Ngi73lHu9bV3uKffa020M3Q/wBT6Jult/BnOwAKfgzOA8I1/PvoK38Ps8x9Ba144u58O+rEst6gxd7TdGPuzzvSLnyYpR35ON4XO+nA/7MV0rxtz72bOs28YlM8e+rrNwqb5brgZy01Pnlifw4qBjEO6dtaqnzoLEo1moetwZOrfKVgl1lhl4Dz9vC9t1pA+p+fadI55TTZ3QhxgzcBzsd2FbnICLf+IbBPzjpWAJAAA=
   </data>
  </layer>
  <objectgroup name="Object Layer 1" width="30" height="20" visible="0">
