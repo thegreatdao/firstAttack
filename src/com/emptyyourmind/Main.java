@@ -1,9 +1,12 @@
 package com.emptyyourmind;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import org.anddev.andengine.audio.music.Music;
+import org.anddev.andengine.audio.music.MusicFactory;
 import org.anddev.andengine.audio.sound.Sound;
 import org.anddev.andengine.audio.sound.SoundFactory;
 import org.anddev.andengine.engine.Engine;
@@ -17,6 +20,8 @@ import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolic
 import org.anddev.andengine.entity.layer.ILayer;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLayer;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader;
+import org.anddev.andengine.entity.layer.tiled.tmx.TMXObject;
+import org.anddev.andengine.entity.layer.tiled.tmx.TMXObjectGroup;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXProperties;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTile;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTileProperty;
@@ -28,6 +33,7 @@ import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
 import org.anddev.andengine.entity.shape.Shape;
+import org.anddev.andengine.entity.sprite.AnimatedSprite;
 import org.anddev.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
 import org.anddev.andengine.extension.physics.box2d.PhysicsConnector;
 import org.anddev.andengine.extension.physics.box2d.PhysicsFactory;
@@ -57,6 +63,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private int mapWidth;
 	private int mapHeight;
 	private Sound explosionSound;
+	private Music backgourndMusic;
 
 	private BoundCamera mBoundChaseCamera;
 
@@ -70,20 +77,26 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private Body playerBody;
 	
 	private Texture mOnScreenControlTexture;
+	private Texture bulletTexture;
+	private Texture mineTexture;
+	private Texture greenBallTexture;
+	private TiledTextureRegion mineTextureRegion;
+	private TiledTextureRegion greenBallTextureRegion;
 	private TextureRegion mOnScreenControlBaseTextureRegion;
 	private TextureRegion mOnScreenControlKnobTextureRegion;
 	private TextureRegion mBulletTextureRegion;
-	private Texture bulletTexture;
 	private Scene scene;
 	private long currentTimeInmillis;
-	private static final int SHOT_TIME_INTERVAL = 1500;
+	private static final int SHOT_TIME_INTERVAL = 200;
+	private int playerSpawnX;
+	private int playerSpawnY;
 	@Override
 	public Engine onLoadEngine()
 	{
 		mBoundChaseCamera = new BoundCamera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE,
 				new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT),
-				mBoundChaseCamera).setNeedsSound(true));
+				mBoundChaseCamera).setNeedsSound(true).setNeedsMusic(true));
 	}
 
 	@Override
@@ -104,12 +117,20 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		mOnScreenControlKnobTextureRegion = TextureRegionFactory
 				.createFromAsset(mOnScreenControlTexture, this,
 						"onscreen_control_knob.png", 128, 0);
-
-		mEngine.getTextureManager().loadTextures(playerTexture, bulletTexture, mOnScreenControlTexture);
+		
+		mineTexture = new Texture(64, 32, TextureOptions.DEFAULT);
+		greenBallTexture = new Texture(64, 16, TextureOptions.DEFAULT);
+		mineTextureRegion = TextureRegionFactory.createTiledFromAsset(mineTexture, this, "mine.png", 0, 0, 3, 1);
+		greenBallTextureRegion = TextureRegionFactory.createTiledFromAsset(greenBallTexture, this, "greenBall.png", 0, 0, 4, 1);
+		mEngine.getTextureManager().loadTextures(playerTexture, bulletTexture, mOnScreenControlTexture, mineTexture, greenBallTexture);
 		
 		SoundFactory.setAssetBasePath("mfx/");
+		MusicFactory.setAssetBasePath("mfx/");
 		try {
 			this.explosionSound = SoundFactory.createSoundFromAsset(this.mEngine.getSoundManager(), this, "explosion.ogg");
+			this.backgourndMusic= MusicFactory.createMusicFromAsset(this.mEngine.getMusicManager(), this, "bg.ogg");
+			backgourndMusic.setLooping(true);
+			backgourndMusic.play();
 		} catch (final IOException e) {
 			Debug.e("Error", e);
 		}
@@ -141,7 +162,6 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 							if (pTMXTileProperties.containsTMXProperty(
 									"cactus", "true"))
 							{
-								Main.this.mCactusCount++;
 							}
 						}
 					});
@@ -154,13 +174,16 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 
 		final TMXLayer tmxLayer = mTMXTiledMap.getTMXLayers().get(0);
 		final TMXLayer tmxLayer2 = mTMXTiledMap.getTMXLayers().get(1);
-		/*
-		 * final TMXLayer tmxLayer3 = mTMXTiledMap.getTMXLayers().get(2); final
-		 * TMXLayer tmxLayer4 = mTMXTiledMap.getTMXLayers().get(3);
-		 * TMXObjectGroup tmxObjectGroup =
-		 * mTMXTiledMap.getTMXObjectGroups().get(0); TMXObject tmxObject =
-		 * tmxObjectGroup.getTMXObjects().get(0);
-		 */
+		final TMXObjectGroup tmxObjectGroup = mTMXTiledMap.getTMXObjectGroups().get(0);
+		ArrayList<TMXObject> tmxObjects = tmxObjectGroup.getTMXObjects();
+		for(TMXObject tmxObject : tmxObjects)
+		{
+			if(tmxObject.getName().equals("playerSpawnPoint"))
+			{
+				playerSpawnX = tmxObject.getX();
+				playerSpawnY = tmxObject.getY();
+			}
+		}
 		scene.getBottomLayer().addEntity(tmxLayer);
 		scene.getBottomLayer().addEntity(tmxLayer2);
 		/* Make the camera not exceed the bounds of the TMXLayer. */
@@ -174,11 +197,8 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		 * camera.
 		 */
 
-		final int centerX = (CAMERA_WIDTH - mPlayerTextureRegion.getTileWidth()) / 2;
-		final int centerY = (CAMERA_HEIGHT - mPlayerTextureRegion.getTileHeight()) / 2;
-
 		/* Create the sprite and add it to the scene. */
-		player = new CustomizedAnimatedSprite(centerX, centerY, mPlayerTextureRegion, new IPositionChangedListener()
+		player = new CustomizedAnimatedSprite(playerSpawnX, playerSpawnY, mPlayerTextureRegion, new IPositionChangedListener()
 		{
 			@Override
 			public void onPositionChanged(float posX, float posY)
@@ -188,6 +208,14 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		player.animate(100);
 		scene.getTopLayer().addEntity(player);
 		player.setUpdatePhysics(false);
+		
+		AnimatedSprite mine = new AnimatedSprite(100, 100, mineTextureRegion);
+		mine.animate(200);
+		scene.getTopLayer().addEntity(mine);
+		
+		AnimatedSprite greenBall = new AnimatedSprite(200,200, greenBallTextureRegion);
+		greenBall.animate(100);
+		scene.getTopLayer().addEntity(greenBall);
 		final FixtureDef carFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
 		playerBody = PhysicsFactory.createBoxBody(physicsWorld, player, BodyType.DynamicBody, carFixtureDef);
 		
@@ -242,14 +270,14 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		if (pTouchEvent.getAction() == TouchEvent.ACTION_DOWN)
 		{
 			long now = System.currentTimeMillis();
-			if(currentTimeInmillis ==0)
+			if(currentTimeInmillis == 0)
 			{
 				currentTimeInmillis = now;
 			}
 			if(now - currentTimeInmillis >= SHOT_TIME_INTERVAL)
 			{
 				
-				shotBullets(player, pScene);
+				shotBullets(player, pScene.getTopLayer(), 100, 100);
 				explosionSound.play();
 				currentTimeInmillis = now;
 			}
@@ -323,7 +351,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		bottomLayer.addEntity(right);
 	}
 	
-	private CustomizedSprite createBullet(float x, float y)
+	private CustomizedSprite createBullet(float x, float y, final ILayer layer)
 	{
 		final CustomizedSprite bullet = new CustomizedSprite(x, y, mBulletTextureRegion);
 		IPositionChangedListener iPositionChangedListener = new IPositionChangedListener()
@@ -332,13 +360,17 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 			@Override
 			public void onPositionChanged(float posX, float posY)
 			{
-				if(posX <=0 || posX >= mapWidth)
+				if(posX <=0 || posX >= mapWidth || posY <=0 || posY >= mapHeight)
 				{
-					bullet.setVelocity(-bullet.getVelocityX(), bullet.getVelocityY());
-				}
-				if(posY <=0 || posY >= mapHeight)
-				{
-					bullet.setVelocity(bullet.getVelocityX(), -bullet.getVelocityY());
+					runOnUpdateThread(new Runnable()
+					{
+						
+						@Override
+						public void run()
+						{
+							layer.removeEntity(bullet);
+						}
+					});
 				}
 			}
 		};
@@ -346,26 +378,24 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		return bullet;
 	}
 	
-	private void shotBullets(CustomizedAnimatedSprite ship, Scene scene)
+	private void shotBullets(CustomizedAnimatedSprite ship, ILayer layer, float xVelocity, float yVelocity)
 	{
 		float width = ship.getWidth();
 		float height = ship.getHeight();
 		float x = ship.getX();
 		float y = ship.getY();
-		CustomizedSprite upBullet = createBullet(x + width / 2, y);
-		upBullet.setVelocity(0, -10);
-		scene.getTopLayer().addEntity(upBullet);
-		CustomizedSprite downBullet = createBullet(x + width / 2, y + height);
-		downBullet.setVelocity(0, 10);
-		scene.getTopLayer().addEntity(downBullet);
-		CustomizedSprite rightBullet = createBullet(x + width, y + height / 2);
-		rightBullet.setVelocity(10, 0);
-		scene.getTopLayer().addEntity(rightBullet);
-		CustomizedSprite leftBullet = createBullet(x, y + height / 2);
-		leftBullet.setVelocity(-10, 0);
-		scene.getTopLayer().addEntity(leftBullet);
-		
-		
+		CustomizedSprite upBullet = createBullet(x + width / 2, y, layer);
+		upBullet.setVelocity(0, -yVelocity);
+		layer.addEntity(upBullet);
+		CustomizedSprite downBullet = createBullet(x + width / 2, y + height, layer);
+		downBullet.setVelocity(0, yVelocity);
+		layer.addEntity(downBullet);
+		CustomizedSprite rightBullet = createBullet(x + width, y + height / 2, layer);
+		rightBullet.setVelocity(xVelocity, 0);
+		layer.addEntity(rightBullet);
+		CustomizedSprite leftBullet = createBullet(x, y + height / 2, layer);
+		leftBullet.setVelocity(-xVelocity, 0);
+		layer.addEntity(leftBullet);
 	}
 	
 }
