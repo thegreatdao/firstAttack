@@ -11,9 +11,12 @@ import org.anddev.andengine.audio.sound.Sound;
 import org.anddev.andengine.audio.sound.SoundFactory;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.BoundCamera;
+import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
 import org.anddev.andengine.engine.camera.hud.controls.BaseOnScreenControl;
 import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
+import org.anddev.andengine.engine.handler.timer.ITimerCallback;
+import org.anddev.andengine.engine.handler.timer.TimerHandler;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
@@ -34,6 +37,7 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
 import org.anddev.andengine.entity.shape.Shape;
 import org.anddev.andengine.entity.sprite.AnimatedSprite;
+import org.anddev.andengine.entity.sprite.BaseSprite;
 import org.anddev.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
 import org.anddev.andengine.extension.physics.box2d.PhysicsConnector;
 import org.anddev.andengine.extension.physics.box2d.PhysicsFactory;
@@ -60,6 +64,8 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 {
 	private static final int CAMERA_WIDTH = 320;
 	private static final int CAMERA_HEIGHT = 480;
+	private static final int CAMERA_HALF_WIDTH = CAMERA_WIDTH / 2;
+	private static final int CAMERA_HALF_HEIGHT = CAMERA_HEIGHT / 2;
 	private int mapWidth;
 	private int mapHeight;
 	@SuppressWarnings("unused")
@@ -78,6 +84,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private TMXTiledMap mTMXTiledMap;
 	protected int mCactusCount;
 	private CustomizedAnimatedSprite player;
+	private CustomizedAnimatedSprite enemyBoss;
 	private Body playerBody;
 	private Body enemyBody;
 	
@@ -95,6 +102,8 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private static final int SHOT_TIME_INTERVAL = 200;
 	private int playerSpawnX;
 	private int playerSpawnY;
+	private boolean flip;
+	
 	@Override
 	public Engine onLoadEngine()
 	{
@@ -180,14 +189,14 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		}
 
 		final TMXLayer tmxLayer = mTMXTiledMap.getTMXLayers().get(0);
-		TMXTile tmxTile = tmxLayer.getTMXTile(5, 5);
+/*		TMXTile tmxTile = tmxLayer.getTMXTile(5, 5);
 		TMXTile tmxTile2 = tmxLayer.getTMXTile(5, 6);
 		addObstacles(tmxTile, tmxTile2, scene.getTopLayer(), physicsWorld);
 		tmxTile = tmxLayer.getTMXTile(6, 10);
 		tmxTile2 = tmxLayer.getTMXTile(10, 10);
 		addObstacles(tmxTile, tmxTile2, scene.getTopLayer(), physicsWorld);
 		tmxTile = tmxLayer.getTMXTile(8, 8);
-		addObstacles(tmxTile, tmxTile, scene.getTopLayer(), physicsWorld);
+		addObstacles(tmxTile, tmxTile, scene.getTopLayer(), physicsWorld);*/
 		
 		final TMXLayer tmxLayer2 = mTMXTiledMap.getTMXLayers().get(1);
 		final TMXObjectGroup tmxObjectGroup = mTMXTiledMap.getTMXObjectGroups().get(0);
@@ -212,7 +221,16 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		 * Calculate the coordinates for the face, so its centered on the
 		 * camera.
 		 */
-		AnimatedSprite enemyBoss = new AnimatedSprite(200, 200, enemyBossTextureRegion);
+		enemyBoss = new CustomizedAnimatedSprite(100, 100, enemyBossTextureRegion, new IPositionChangedListener()
+		{
+			
+			@Override
+			public void onPositionChanged(float posX, float posY)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		enemyBoss.animate(200);
 		scene.getTopLayer().addEntity(enemyBoss);
 		/* Create the sprite and add it to the scene. */
@@ -235,7 +253,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		scene.getTopLayer().addEntity(greenBall);
 		final FixtureDef carFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
 		playerBody = PhysicsFactory.createBoxBody(physicsWorld, player, BodyType.DynamicBody, carFixtureDef);
-		enemyBody = PhysicsFactory.createBoxBody(physicsWorld, enemyBoss, BodyType.DynamicBody, carFixtureDef);
+		enemyBody = PhysicsFactory.createBoxBody(physicsWorld, enemyBoss, BodyType.StaticBody, carFixtureDef);
 		physicsWorld.registerPhysicsConnector(new PhysicsConnector(player, playerBody, true, false, false, false));
 		physicsWorld.registerPhysicsConnector(new PhysicsConnector(enemyBoss, enemyBody, true, false, false, false));
 		
@@ -251,10 +269,8 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 					@Override
 					public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY)
 					{
-						this.mVelocityTemp.set(pValueX * 2, pValueY * 3);
-						final Body carBody = Main.this.playerBody;
-						carBody.setLinearVelocity(this.mVelocityTemp);
-						enemyBody.setLinearVelocity(new Vector2(2, 2));
+						this.mVelocityTemp.set(pValueX * 2.1f, pValueY * 3.1f);
+						Main.this.playerBody.setLinearVelocity(this.mVelocityTemp);
 					}
 					@Override
 					public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl)
@@ -272,13 +288,36 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 //		drawSystem(scene);
 		scene.registerUpdateHandler(physicsWorld);
 
+		scene.registerUpdateHandler(new TimerHandler(0.5f, true, new ITimerCallback()
+		{
+			
+			Vector2 v2 = new Vector2();
+			@Override
+			public void onTimePassed(TimerHandler pTimerHandler)
+			{
+				if(isInCamera(enemyBoss, mBoundChaseCamera))
+				{
+					shotBaisicBullets(enemyBoss, scene.getTopLayer(), 50, 50);
+					if(flip)
+					{
+						v2.set(-1, 0);
+					}
+					else
+					{
+						v2.set(1, 0);
+					}
+					enemyBody.setLinearVelocity(v2);
+					flip = !flip;
+				}
+			}
+		}));
 		return scene;
 	}
 
 	@Override
 	public void onLoadComplete()
 	{
-
+		
 	}
 
 	@Override
@@ -415,6 +454,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		layer.addEntity(leftBullet);*/
 	}
 	
+	@SuppressWarnings("unused")
 	private void addObstacles(TMXTile startTile, TMXTile endTile, ILayer layer, PhysicsWorld physicsWorld)
 	{
 		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
@@ -448,4 +488,44 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		PhysicsFactory.createBoxBody(physicsWorld, right, BodyType.StaticBody, wallFixtureDef);
 	}
 	
+	private boolean isInCamera(BaseSprite pSprite, Camera mCamera)
+	{
+		float centerX = mCamera.getCenterX();
+		float centerY = mCamera.getCenterY();
+		float width = mCamera.getWidth();
+		float height = mCamera.getHeight();
+		if ((pSprite.getX() >= (centerX - CAMERA_HALF_WIDTH - pSprite .getWidthScaled())) && (pSprite.getX() <= (centerX + CAMERA_HALF_WIDTH)) && (pSprite.getY() >= (centerY - CAMERA_HALF_HEIGHT - pSprite.getHeightScaled())) && (pSprite.getY() <= (centerY + CAMERA_HALF_HEIGHT)))
+		{
+//			freezeCameraNoChasing(mCamera, centerX, centerY, width, height);
+			return true;
+		}
+		return false;
+	}
+
+	private void freezeCameraNoChasing(Camera mCamera, float centerX, float centerY, float width, float height)
+	{
+		mCamera.setChaseShape(null);
+		freezeCamera(centerX, centerY, width, height);
+	}
+
+	private void freezeCamera(float centerX, float centerY, float width, float height)
+	{
+		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
+		Shape top = new Rectangle(centerX - width / 2, centerY - height / 2, width, 1);
+		top.setColor(0, 0, 0);
+		Shape bottom = new Rectangle(centerX - width / 2, centerY + height / 2, width, 1);
+		bottom.setColor(0, 0, 0);
+		Shape left = new Rectangle(centerX - width / 2, centerY - height / 2, 1, height);
+		left.setColor(0, 0, 0);
+		Shape right = new Rectangle(centerX + width / 2, centerY - height / 2, 1, height);
+		right.setColor(0, 0, 0);
+		scene.getTopLayer().addEntity(top);
+		scene.getTopLayer().addEntity(bottom);
+		scene.getTopLayer().addEntity(left);
+		scene.getTopLayer().addEntity(right);
+		PhysicsFactory.createBoxBody(physicsWorld, top, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(physicsWorld, bottom, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(physicsWorld, left, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(physicsWorld, right, BodyType.StaticBody, wallFixtureDef);
+	}
 }
