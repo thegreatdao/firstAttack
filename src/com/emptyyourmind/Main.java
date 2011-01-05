@@ -79,6 +79,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	protected int mCactusCount;
 	private CustomizedAnimatedSprite player;
 	private Body playerBody;
+	private Body enemyBody;
 	
 	private Texture mOnScreenControlTexture;
 	private Texture bulletTexture;
@@ -234,8 +235,9 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		scene.getTopLayer().addEntity(greenBall);
 		final FixtureDef carFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
 		playerBody = PhysicsFactory.createBoxBody(physicsWorld, player, BodyType.DynamicBody, carFixtureDef);
-		
-		physicsWorld.registerPhysicsConnector(new PhysicsConnector(player, playerBody, true, false, true, false));
+		enemyBody = PhysicsFactory.createBoxBody(physicsWorld, enemyBoss, BodyType.DynamicBody, carFixtureDef);
+		physicsWorld.registerPhysicsConnector(new PhysicsConnector(player, playerBody, true, false, false, false));
+		physicsWorld.registerPhysicsConnector(new PhysicsConnector(enemyBoss, enemyBody, true, false, false, false));
 		
 		setBorder(scene);
 		scene.setOnSceneTouchListener(this);
@@ -250,10 +252,9 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 					public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY)
 					{
 						this.mVelocityTemp.set(pValueX * 2, pValueY * 3);
-						
 						final Body carBody = Main.this.playerBody;
 						carBody.setLinearVelocity(this.mVelocityTemp);
-						
+						enemyBody.setLinearVelocity(new Vector2(2, 2));
 					}
 					@Override
 					public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl)
