@@ -58,8 +58,8 @@ import com.emptyyourmind.entity.IPositionChangedListener;
 
 public class Main extends BaseGameActivity implements IOnSceneTouchListener
 {
-	private static final int CAMERA_WIDTH = 480;
-	private static final int CAMERA_HEIGHT = 320;
+	private static final int CAMERA_WIDTH = 320;
+	private static final int CAMERA_HEIGHT = 480;
 	private int mapWidth;
 	private int mapHeight;
 	@SuppressWarnings("unused")
@@ -72,7 +72,9 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private PhysicsWorld physicsWorld;
 
 	private Texture playerTexture;
+	private Texture enemyBossTexture;
 	private TiledTextureRegion mPlayerTextureRegion;
+	private TiledTextureRegion enemyBossTextureRegion;
 	private TMXTiledMap mTMXTiledMap;
 	protected int mCactusCount;
 	private CustomizedAnimatedSprite player;
@@ -96,7 +98,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	public Engine onLoadEngine()
 	{
 		mBoundChaseCamera = new BoundCamera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE,
+		return new Engine(new EngineOptions(true, ScreenOrientation.PORTRAIT,
 				new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT),
 				mBoundChaseCamera).setNeedsSound(true).setNeedsMusic(true));
 	}
@@ -105,7 +107,9 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	public void onLoadResources()
 	{
 		TextureRegionFactory.setAssetBasePath("gfx/");
+		enemyBossTexture = new Texture(256, 64, TextureOptions.DEFAULT);
 		playerTexture = new Texture(64, 32, TextureOptions.DEFAULT);
+		enemyBossTextureRegion = TextureRegionFactory.createTiledFromAsset(enemyBossTexture, this, "enemy.png", 0, 0, 2, 1);
 		mPlayerTextureRegion = TextureRegionFactory.createTiledFromAsset(
 				playerTexture, this, "player.png", 0, 0, 3, 1); // 72x128
 		bulletTexture = new Texture(16, 32, TextureOptions.BILINEAR);
@@ -124,7 +128,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		greenBallTexture = new Texture(64, 16, TextureOptions.DEFAULT);
 		mineTextureRegion = TextureRegionFactory.createTiledFromAsset(mineTexture, this, "mine.png", 0, 0, 3, 1);
 		greenBallTextureRegion = TextureRegionFactory.createTiledFromAsset(greenBallTexture, this, "greenBall.png", 0, 0, 4, 1);
-		mEngine.getTextureManager().loadTextures(playerTexture, bulletTexture, mOnScreenControlTexture, mineTexture, greenBallTexture);
+		mEngine.getTextureManager().loadTextures(playerTexture, bulletTexture, mOnScreenControlTexture, mineTexture, greenBallTexture, enemyBossTexture);
 		
 		SoundFactory.setAssetBasePath("mfx/");
 		MusicFactory.setAssetBasePath("mfx/");
@@ -175,6 +179,15 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		}
 
 		final TMXLayer tmxLayer = mTMXTiledMap.getTMXLayers().get(0);
+		TMXTile tmxTile = tmxLayer.getTMXTile(5, 5);
+		TMXTile tmxTile2 = tmxLayer.getTMXTile(5, 6);
+		addObstacles(tmxTile, tmxTile2, scene.getTopLayer(), physicsWorld);
+		tmxTile = tmxLayer.getTMXTile(6, 10);
+		tmxTile2 = tmxLayer.getTMXTile(10, 10);
+		addObstacles(tmxTile, tmxTile2, scene.getTopLayer(), physicsWorld);
+		tmxTile = tmxLayer.getTMXTile(8, 8);
+		addObstacles(tmxTile, tmxTile, scene.getTopLayer(), physicsWorld);
+		
 		final TMXLayer tmxLayer2 = mTMXTiledMap.getTMXLayers().get(1);
 		final TMXObjectGroup tmxObjectGroup = mTMXTiledMap.getTMXObjectGroups().get(0);
 		ArrayList<TMXObject> tmxObjects = tmxObjectGroup.getTMXObjects();
@@ -198,7 +211,9 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		 * Calculate the coordinates for the face, so its centered on the
 		 * camera.
 		 */
-
+		AnimatedSprite enemyBoss = new AnimatedSprite(200, 200, enemyBossTextureRegion);
+		enemyBoss.animate(200);
+		scene.getTopLayer().addEntity(enemyBoss);
 		/* Create the sprite and add it to the scene. */
 		player = new CustomizedAnimatedSprite(playerSpawnX, playerSpawnY, mPlayerTextureRegion, new IPositionChangedListener()
 		{
@@ -207,7 +222,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 			{
 			}
 		});
-		player.animate(100);
+		player.animate(200);
 		scene.getTopLayer().addEntity(player);
 		player.setUpdatePhysics(false);
 		AnimatedSprite mine = new AnimatedSprite(100, 100, mineTextureRegion);
@@ -215,7 +230,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		scene.getTopLayer().addEntity(mine);
 		
 		AnimatedSprite greenBall = new AnimatedSprite(200,200, greenBallTextureRegion);
-		greenBall.animate(100);
+		greenBall.animate(200);
 		scene.getTopLayer().addEntity(greenBall);
 		final FixtureDef carFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
 		playerBody = PhysicsFactory.createBoxBody(physicsWorld, player, BodyType.DynamicBody, carFixtureDef);
@@ -332,7 +347,8 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		}
 	}
 	
-	private void setBorder(final Scene pScene) {
+	private void setBorder(final Scene pScene)
+	{
 		final Shape bottom = new Rectangle(-1, mapHeight + 1, mapWidth, 1);
 		final Shape top = new Rectangle(-1, -1, mapWidth, 1);
 		final Shape left = new Rectangle(-1, -1, 1, mapHeight);
@@ -381,7 +397,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private void shotBaisicBullets(CustomizedAnimatedSprite ship, ILayer layer, float xVelocity, float yVelocity)
 	{
 		float width = ship.getWidth();
-		float height = ship.getHeight();
+//		float height = ship.getHeight();
 		float x = ship.getX();
 		float y = ship.getY();
 		CustomizedSprite upBullet = createBullet(x + width / 2 - 2, y, layer);
@@ -396,6 +412,39 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		CustomizedSprite leftBullet = createBullet(x - 2, y + height / 2 - 2, layer);
 		leftBullet.setVelocity(-xVelocity, 0);
 		layer.addEntity(leftBullet);*/
+	}
+	
+	private void addObstacles(TMXTile startTile, TMXTile endTile, ILayer layer, PhysicsWorld physicsWorld)
+	{
+		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
+		int borderThickness = 1;
+		int tileWidth = startTile.getTileWidth();
+		int tileHeight = startTile.getTileHeight();
+		int borderWidth = tileWidth;
+		int borderHeight = tileHeight;
+		if(startTile != endTile)
+		{
+			borderWidth = tileWidth * (1 + endTile.getTileColumn() - startTile.getTileColumn());
+			borderHeight = tileHeight * (1 + endTile.getTileRow() - startTile.getTileRow());
+		}
+		int originX = startTile.getTileX();
+		int originY = startTile.getTileY();
+		Shape top = new Rectangle(originX, originY, borderWidth, borderThickness);
+		top.setColor(0, 0, 0, 0);
+		Shape bottom = new Rectangle(originX, originY + borderHeight, borderWidth, borderThickness);
+		bottom.setColor(0, 0, 0, 0);
+		Shape left = new Rectangle(originX, originY, borderThickness, borderHeight);
+		left.setColor(0, 0, 0, 0);
+		Shape right = new Rectangle(originX + borderWidth, originY, borderThickness, borderHeight);
+		right.setColor(0, 0, 0, 0);
+		layer.addEntity(top);
+		layer.addEntity(bottom);
+		layer.addEntity(left);
+		layer.addEntity(right);
+		PhysicsFactory.createBoxBody(physicsWorld, top, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(physicsWorld, bottom, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(physicsWorld, left, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(physicsWorld, right, BodyType.StaticBody, wallFixtureDef);
 	}
 	
 }
