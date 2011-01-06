@@ -11,24 +11,17 @@ public class BasePositionChangedListener implements IPositionChangedListener
 {
 	private Shape shape;
 	private ILayer layer;
-	@SuppressWarnings("unused")
-	private int boundaryX;
-	@SuppressWarnings("unused")
-	private int boundaryY;
 	private Camera camera;
 	private float cameraHalfWidth;
 	private float cameraHalfHeight;
 	private BaseGameActivity baseGameActivity;
 
 	public BasePositionChangedListener(Shape shape, ILayer layer,
-			Camera camera, int boundaryX, int boundaryY, float cameraHalfWidth,
-			float cameraHalfHeight, BaseGameActivity baseGameActivity)
+			Camera camera, float cameraHalfWidth, float cameraHalfHeight, BaseGameActivity baseGameActivity)
 	{
 		this.shape = shape;
 		this.layer = layer;
 		this.camera = camera;
-		this.boundaryX = boundaryX;
-		this.boundaryY = boundaryY;
 		this.cameraHalfWidth = cameraHalfWidth;
 		this.cameraHalfHeight = cameraHalfHeight;
 		this.baseGameActivity = baseGameActivity;

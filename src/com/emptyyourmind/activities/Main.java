@@ -413,7 +413,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private NonShootableSprite createBullet(float x, float y, final ILayer layer)
 	{
 		final NonShootableSprite bullet = new NonShootableSprite(x, y, mBulletTextureRegion, scene.getTopLayer());
-		bullet.setiPositionChangedListener(new BasePositionChangedListener(bullet, scene.getTopLayer(), mBoundChaseCamera, mapWidth, mapHeight, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, this));
+		bullet.setiPositionChangedListener(new BasePositionChangedListener(bullet, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, this));
 		return bullet;
 	}
 	
