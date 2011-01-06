@@ -104,6 +104,11 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private int playerSpawnY;
 	private boolean flip;
 	
+	private Shape topCameraBound;
+	private Shape bottomCameraBound;
+	private Body topCameraBoundBody;
+	private Body bottomCameraBoundBody;
+	
 	@Override
 	public Engine onLoadEngine()
 	{
@@ -253,13 +258,14 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		scene.getTopLayer().addEntity(greenBall);
 		final FixtureDef carFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
 		playerBody = PhysicsFactory.createBoxBody(physicsWorld, player, BodyType.DynamicBody, carFixtureDef);
-		enemyBody = PhysicsFactory.createBoxBody(physicsWorld, enemyBoss, BodyType.KinematicBody, carFixtureDef);
+		enemyBody = PhysicsFactory.createBoxBody(physicsWorld, enemyBoss, BodyType.DynamicBody, carFixtureDef);
 		physicsWorld.registerPhysicsConnector(new PhysicsConnector(player, playerBody, true, false, false, false));
 		physicsWorld.registerPhysicsConnector(new PhysicsConnector(enemyBoss, enemyBody, true, false, true, false));
 		
 		setBorder(scene);
 		scene.setOnSceneTouchListener(this);
-		mBoundChaseCamera.setChaseShape(player);
+		mBoundChaseCamera.setCenter(mapWidth/2, mapHeight);
+//		mBoundChaseCamera.setChaseShape(player);
 
 		final AnalogOnScreenControl analogOnScreenControl = new AnalogOnScreenControl(
 				0, CAMERA_HEIGHT - mOnScreenControlBaseTextureRegion.getHeight(), mBoundChaseCamera, mOnScreenControlBaseTextureRegion, mOnScreenControlKnobTextureRegion, 0.1f, 200,
@@ -309,6 +315,18 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 					enemyBody.setLinearVelocity(v2);
 					flip = !flip;
 				}
+			}
+		}));
+		
+		scene.registerUpdateHandler(new TimerHandler(0.1f, true, new ITimerCallback()
+		{
+			@Override
+			public void onTimePassed(TimerHandler pTimerHandler)
+			{
+				float centerX = mBoundChaseCamera.getCenterX();
+				float centerY = mBoundChaseCamera.getCenterY();
+				mBoundChaseCamera.setCenter(player.getX(), centerY - 1.0f);
+				setCameraChaseBound(centerX, centerY);
 			}
 		}));
 		return scene;
@@ -488,6 +506,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		PhysicsFactory.createBoxBody(physicsWorld, right, BodyType.StaticBody, wallFixtureDef);
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean isInCamera(BaseSprite pSprite, Camera mCamera)
 	{
 		float centerX = mCamera.getCenterX();
@@ -502,6 +521,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		return false;
 	}
 
+	@SuppressWarnings("unused")
 	private void freezeCameraNoChasing(Camera mCamera, float centerX, float centerY, float width, float height)
 	{
 		mCamera.setChaseShape(null);
@@ -527,5 +547,35 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		PhysicsFactory.createBoxBody(physicsWorld, bottom, BodyType.StaticBody, wallFixtureDef);
 		PhysicsFactory.createBoxBody(physicsWorld, left, BodyType.StaticBody, wallFixtureDef);
 		PhysicsFactory.createBoxBody(physicsWorld, right, BodyType.StaticBody, wallFixtureDef);
+	}
+	
+	private void setCameraChaseBound(float centerX, float centerY)
+	{
+		ILayer topLayer = scene.getTopLayer();
+		if(topCameraBound != null)
+		{
+			topLayer.removeEntity(topCameraBound);
+		}
+		if(bottomCameraBound != null)
+		{
+			topLayer.removeEntity(bottomCameraBound);
+		}
+		if(topCameraBoundBody != null)
+		{
+			physicsWorld.destroyBody(topCameraBoundBody);
+		}
+		if(bottomCameraBoundBody != null)
+		{
+			physicsWorld.destroyBody(bottomCameraBoundBody);
+		}
+		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
+		topCameraBound = new Rectangle(centerX - mapWidth / 2, centerY - CAMERA_HEIGHT / 2, mapWidth, 1);
+		topCameraBound.setColor(1, 1, 1, 0);
+		bottomCameraBound = new Rectangle(centerX - mapWidth / 2, centerY + CAMERA_HEIGHT / 2, mapWidth, 1);
+		bottomCameraBound.setColor(0, 0, 0, 0);
+		topLayer.addEntity(topCameraBound);
+		topLayer.addEntity(bottomCameraBound);
+		topCameraBoundBody = PhysicsFactory.createBoxBody(physicsWorld, topCameraBound, BodyType.StaticBody, wallFixtureDef);
+		bottomCameraBoundBody = PhysicsFactory.createBoxBody(physicsWorld, bottomCameraBound, BodyType.StaticBody, wallFixtureDef);
 	}
 }
