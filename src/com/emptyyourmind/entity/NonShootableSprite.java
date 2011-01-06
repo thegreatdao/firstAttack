@@ -1,13 +1,14 @@
 package com.emptyyourmind.entity;
 
+import org.anddev.andengine.entity.layer.ILayer;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
-public class CustomizedSprite extends Sprite
+public class NonShootableSprite extends Sprite
 {
 	private IPositionChangedListener iPositionChangedListener;
 
-	public CustomizedSprite(float pX, float pY, TextureRegion pTextureRegion)
+	public NonShootableSprite(float pX, float pY, TextureRegion pTextureRegion, ILayer layer)
 	{
 		super(pX, pY, pTextureRegion);
 	}
@@ -18,13 +19,8 @@ public class CustomizedSprite extends Sprite
 		super.onPositionChanged();
 		if(iPositionChangedListener != null)
 		{
-			iPositionChangedListener.onPositionChanged(mX, mY);
+			iPositionChangedListener.onPositionChanged();
 		}
-	}
-
-	public IPositionChangedListener getiPositionChangedListener()
-	{
-		return iPositionChangedListener;
 	}
 
 	public void setiPositionChangedListener(

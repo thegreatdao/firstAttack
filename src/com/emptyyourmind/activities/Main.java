@@ -1,4 +1,4 @@
-package com.emptyyourmind;
+package com.emptyyourmind.activities;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,9 +55,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-import com.emptyyourmind.entity.CustomizedAnimatedSprite;
-import com.emptyyourmind.entity.CustomizedSprite;
-import com.emptyyourmind.entity.IPositionChangedListener;
+import com.emptyyourmind.entity.BasePositionChangedListener;
+import com.emptyyourmind.entity.NonShootableAnimatedSprite;
+import com.emptyyourmind.entity.NonShootableSprite;
 
 
 public class Main extends BaseGameActivity implements IOnSceneTouchListener
@@ -83,8 +83,8 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	private TiledTextureRegion enemyBossTextureRegion;
 	private TMXTiledMap mTMXTiledMap;
 	protected int mCactusCount;
-	private CustomizedAnimatedSprite player;
-	private CustomizedAnimatedSprite enemyBoss;
+	private NonShootableAnimatedSprite player;
+	private NonShootableAnimatedSprite enemyBoss;
 	private Body playerBody;
 	private Body enemyBody;
 	
@@ -226,26 +226,11 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		 * Calculate the coordinates for the face, so its centered on the
 		 * camera.
 		 */
-		enemyBoss = new CustomizedAnimatedSprite(100, 100, enemyBossTextureRegion, new IPositionChangedListener()
-		{
-			
-			@Override
-			public void onPositionChanged(float posX, float posY)
-			{
-				// TODO Auto-generated method stub
-				
-			}
-		});
+		enemyBoss = new NonShootableAnimatedSprite(100, 100, enemyBossTextureRegion, null);
 		enemyBoss.animate(200);
 		scene.getTopLayer().addEntity(enemyBoss);
 		/* Create the sprite and add it to the scene. */
-		player = new CustomizedAnimatedSprite(playerSpawnX, playerSpawnY, mPlayerTextureRegion, new IPositionChangedListener()
-		{
-			@Override
-			public void onPositionChanged(float posX, float posY)
-			{
-			}
-		});
+		player = new NonShootableAnimatedSprite(playerSpawnX, playerSpawnY, mPlayerTextureRegion, null);
 		player.animate(200);
 		scene.getTopLayer().addEntity(player);
 		player.setUpdatePhysics(false);
@@ -301,9 +286,9 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 			@Override
 			public void onTimePassed(TimerHandler pTimerHandler)
 			{
-				if(isInCamera(enemyBoss, mBoundChaseCamera))
-				{
-					shotBaisicBullets(enemyBoss, scene.getTopLayer(), 50, 50);
+				/*if(isInCamera(enemyBoss, mBoundChaseCamera))
+				{*/
+					//shotBullet(enemyBoss, scene.getTopLayer(), 50, 50, true);
 					if(flip)
 					{
 						v2.set(-5, 0);
@@ -314,7 +299,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 					}
 					enemyBody.setLinearVelocity(v2);
 					flip = !flip;
-				}
+//				}
 			}
 		}));
 		
@@ -350,7 +335,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 			}
 			if(now - currentTimeInmillis >= SHOT_TIME_INTERVAL)
 			{
-				shotBaisicBullets(player, pScene.getTopLayer(), 100, 100);
+				shotBullet(player, pScene.getTopLayer(), 100, 100, false);
 //				explosionSound.play();
 				currentTimeInmillis = now;
 			}
@@ -425,41 +410,28 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		bottomLayer.addEntity(right);
 	}
 	
-	private CustomizedSprite createBullet(float x, float y, final ILayer layer)
+	private NonShootableSprite createBullet(float x, float y, final ILayer layer)
 	{
-		final CustomizedSprite bullet = new CustomizedSprite(x, y, mBulletTextureRegion);
-		IPositionChangedListener iPositionChangedListener = new IPositionChangedListener()
-		{
-			
-			@Override
-			public void onPositionChanged(float posX, float posY)
-			{
-				if(posX <=0 || posX >= mapWidth || posY <=0 || posY >= mapHeight)
-				{
-					runOnUpdateThread(new Runnable()
-					{
-						
-						@Override
-						public void run()
-						{
-							layer.removeEntity(bullet);
-						}
-					});
-				}
-			}
-		};
-		bullet.setiPositionChangedListener(iPositionChangedListener);
+		final NonShootableSprite bullet = new NonShootableSprite(x, y, mBulletTextureRegion, scene.getTopLayer());
+		bullet.setiPositionChangedListener(new BasePositionChangedListener(bullet, scene.getTopLayer(), mBoundChaseCamera, mapWidth, mapHeight, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, this));
 		return bullet;
 	}
 	
-	private void shotBaisicBullets(CustomizedAnimatedSprite ship, ILayer layer, float xVelocity, float yVelocity)
+	private void shotBullet(BaseSprite sprite, ILayer layer, float xVelocity, float yVelocity, boolean shootingByEnemey)
 	{
-		float width = ship.getWidth();
+		float width = sprite.getWidth();
 //		float height = ship.getHeight();
-		float x = ship.getX();
-		float y = ship.getY();
-		CustomizedSprite upBullet = createBullet(x + width / 2 - 2, y, layer);
-		upBullet.setVelocity(0, -yVelocity);
+		float x = sprite.getX();
+		float y = sprite.getY();
+		NonShootableSprite upBullet = createBullet(x + width / 2 - 2, y, layer);
+		if(shootingByEnemey)
+		{
+			upBullet.setVelocity(0, yVelocity);
+		}
+		else
+		{
+			upBullet.setVelocity(0, -yVelocity);
+		}
 		layer.addEntity(upBullet);
 /*		CustomizedSprite downBullet = createBullet(x + width / 2 -2, y - 2 + height, layer);
 		downBullet.setVelocity(0, yVelocity);
@@ -473,7 +445,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 	}
 	
 	@SuppressWarnings("unused")
-	private void addObstacles(TMXTile startTile, TMXTile endTile, ILayer layer, PhysicsWorld physicsWorld)
+	private void addObjectObstacles(TMXTile startTile, TMXTile endTile, ILayer layer, PhysicsWorld physicsWorld)
 	{
 		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
 		int borderThickness = 1;
@@ -505,26 +477,10 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		PhysicsFactory.createBoxBody(physicsWorld, left, BodyType.StaticBody, wallFixtureDef);
 		PhysicsFactory.createBoxBody(physicsWorld, right, BodyType.StaticBody, wallFixtureDef);
 	}
-	
-	@SuppressWarnings("unused")
-	private boolean isInCamera(BaseSprite pSprite, Camera mCamera)
-	{
-		float centerX = mCamera.getCenterX();
-		float centerY = mCamera.getCenterY();
-		float width = mCamera.getWidth();
-		float height = mCamera.getHeight();
-		if ((pSprite.getX() >= (centerX - CAMERA_HALF_WIDTH - pSprite .getWidthScaled())) && (pSprite.getX() <= (centerX + CAMERA_HALF_WIDTH)) && (pSprite.getY() >= (centerY - CAMERA_HALF_HEIGHT - pSprite.getHeightScaled())) && (pSprite.getY() <= (centerY + CAMERA_HALF_HEIGHT)))
-		{
-//			freezeCameraNoChasing(mCamera, centerX, centerY, width, height);
-			return true;
-		}
-		return false;
-	}
 
 	@SuppressWarnings("unused")
 	private void freezeCameraNoChasing(Camera mCamera, float centerX, float centerY, float width, float height)
 	{
-		mCamera.setChaseShape(null);
 		freezeCamera(centerX, centerY, width, height);
 	}
 
