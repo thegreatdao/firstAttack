@@ -1,25 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" width="30" height="20" tilewidth="24" tileheight="28">
+<map version="1.0" orientation="orthogonal" width="16" height="80" tilewidth="24" tileheight="28">
  <tileset firstgid="1" name="secondLevel" tilewidth="24" tileheight="28" spacing="3" margin="2">
   <image source="gfx/secondLevel.png"/>
  </tileset>
- <tileset firstgid="101" name="enemy" tilewidth="24" tileheight="28" spacing="3" margin="2">
-  <image source="gfx/enemy.png"/>
+ <tileset firstgid="101" name="starWars" tilewidth="24" tileheight="28" spacing="3" margin="2">
+  <image source="gfx/starWars.png"/>
  </tileset>
- <tileset firstgid="104" name="objects" tilewidth="24" tileheight="28" spacing="3" margin="2">
-  <image source="gfx/objects.png"/>
- </tileset>
- <layer name="Tile Layer 1" width="30" height="20">
+ <layer name="Tile Layer 1" width="16" height="80">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC8WVUU/CMBSFJ25CosKTIiESCUqCQ0XCgxCe3Pwn+/+/wdNkN7me9HYdRHj4ctuu2+m5t2uzJEkykBpxAV5BHmjze024eRegY3DZUtfxDj7AytPPFNfgBozAg4pu7PYAv19gC3b1mO7reaI7AH0VT6XrQ3Qnhu7kn3Xb+v2M1NU11bU+RndL+HR1TXWtQ7qVofsNfkChcP0y+bu378C9wfAAv6HItQ/BWtOArvbD/21a56KovbfV5XZl+PHtJ/GeBdbI52RltLVf7UfqXBq61hqPOZ+tqHV5jZx/+b7wSH3HU0tmDXl2LMEmAK9BmAee5Q155juGWVE+XgydZ4p5RJ5lD+zBmuLOU4dYvzH3tOxNpoyog483cAW6J6YHxmfiF/M5IgFgCQAA
+   H4sIAAAAAAAAC+3WSy8DURQH8EF3ipXXrmFFUAkLtaOsrGh9BNSbekSwLEt8ACyxxCf0n2ROcnJzz30ZOmIWv7Sd3P+999yeTqcQRVGBGYGSxqgyTjIG4xozeT7P5/nM5yeE/KRjPlaDOqwkrzWPbNr59Tatv/AH61+FNQPbPLSmpJ7nM52Pf/uzBj73AFcbil3Y87i+CVvQSD6fwblmHL/OM0dwDE029lCT53jmEq7g2pLhpAxfdxt2HPaknguNO4FTh71I56WynUmsBTeKW4857+Be8aCMOfA4Z996pBof4QmeA9d6gVd4E9bat+Tf4QM+LeMuEup7l76x5dWzMfWNad3Q/fP1qc/U3nKtn/os7q2072eSDuhkujzz3TAMQ1CEnoB8H/R+I19kewjN0x588/0wwAym/P1MQRmmA/NzUIH5wPwiVGEp5bra5b+d50/VS/OWLfNL9dK8FWF+132F5uN9LSey2N+6/wd6PiQNYZyEng9J85fz9HxJTM+mXzseB9kAFAAA
   </data>
  </layer>
- <objectgroup name="Object Layer 1" width="30" height="20">
-  <object name="playerSpawnPoint" x="484" y="282" width="16" height="18"/>
+ <objectgroup name="Object Layer 1" width="16" height="80">
+  <object name="playerSpawnPoint" x="169" y="2173" width="18" height="19"/>
  </objectgroup>
- <layer name="collidable" width="30" height="20" opacity="0">
-  <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC2NgoC7IIFKM2mDU3lF7h5u92DC6HD0BrezF51da24vNfnLcSKq9xJo1EtP9YLUXV7xR4j5izKOFvZS4jd7lzlAGAHSUZV5gCQAA
-  </data>
- </layer>
 </map>

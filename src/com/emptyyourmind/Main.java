@@ -198,7 +198,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		tmxTile = tmxLayer.getTMXTile(8, 8);
 		addObstacles(tmxTile, tmxTile, scene.getTopLayer(), physicsWorld);*/
 		
-		final TMXLayer tmxLayer2 = mTMXTiledMap.getTMXLayers().get(1);
+//		final TMXLayer tmxLayer2 = mTMXTiledMap.getTMXLayers().get(1);
 		final TMXObjectGroup tmxObjectGroup = mTMXTiledMap.getTMXObjectGroups().get(0);
 		ArrayList<TMXObject> tmxObjects = tmxObjectGroup.getTMXObjects();
 		for(TMXObject tmxObject : tmxObjects)
@@ -210,7 +210,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 			}
 		}
 		scene.getBottomLayer().addEntity(tmxLayer);
-		scene.getBottomLayer().addEntity(tmxLayer2);
+//		scene.getBottomLayer().addEntity(tmxLayer2);
 		/* Make the camera not exceed the bounds of the TMXLayer. */
 		mBoundChaseCamera.setBounds(0, tmxLayer.getWidth(), 0, tmxLayer.getHeight());		
 		mBoundChaseCamera.setBoundsEnabled(true);
@@ -253,9 +253,9 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		scene.getTopLayer().addEntity(greenBall);
 		final FixtureDef carFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
 		playerBody = PhysicsFactory.createBoxBody(physicsWorld, player, BodyType.DynamicBody, carFixtureDef);
-		enemyBody = PhysicsFactory.createBoxBody(physicsWorld, enemyBoss, BodyType.StaticBody, carFixtureDef);
+		enemyBody = PhysicsFactory.createBoxBody(physicsWorld, enemyBoss, BodyType.KinematicBody, carFixtureDef);
 		physicsWorld.registerPhysicsConnector(new PhysicsConnector(player, playerBody, true, false, false, false));
-		physicsWorld.registerPhysicsConnector(new PhysicsConnector(enemyBoss, enemyBody, true, false, false, false));
+		physicsWorld.registerPhysicsConnector(new PhysicsConnector(enemyBoss, enemyBody, true, false, true, false));
 		
 		setBorder(scene);
 		scene.setOnSceneTouchListener(this);
@@ -300,11 +300,11 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 					shotBaisicBullets(enemyBoss, scene.getTopLayer(), 50, 50);
 					if(flip)
 					{
-						v2.set(-1, 0);
+						v2.set(-5, 0);
 					}
 					else
 					{
-						v2.set(1, 0);
+						v2.set(5, 0);
 					}
 					enemyBody.setLinearVelocity(v2);
 					flip = !flip;
