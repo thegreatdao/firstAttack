@@ -246,7 +246,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		player.setUpdatePhysics(false);
 		AnimatedSprite mine = new AnimatedSprite(100, 100, mineTextureRegion);
 		mine.animate(200);
-		scene.getTopLayer().addEntity(mine);
+		scene.getBottomLayer().addEntity(mine);
 		
 		AnimatedSprite greenBall = new AnimatedSprite(200,200, greenBallTextureRegion);
 		greenBall.animate(200);
