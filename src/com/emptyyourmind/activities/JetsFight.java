@@ -59,7 +59,6 @@ import com.emptyyourmind.entity.IPositionChangedListener;
 import com.emptyyourmind.entity.IShootable;
 import com.emptyyourmind.entity.NonShootableAnimatedSprite;
 import com.emptyyourmind.entity.ShootableAnimatedSprite;
-import com.emptyyourmind.entity.ShootableSprite;
 import com.emptyyourmind.entity.shootables.BulletShootable;
 
 
@@ -126,10 +125,10 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 	{
 		TextureRegionFactory.setAssetBasePath("gfx/");
 		enemyBossTexture = new Texture(256, 64, TextureOptions.DEFAULT);
-		playerTexture = new Texture(64, 32, TextureOptions.DEFAULT);
+		playerTexture = new Texture(128, 64, TextureOptions.DEFAULT);
 		enemyBossTextureRegion = TextureRegionFactory.createTiledFromAsset(enemyBossTexture, this, "enemy.png", 0, 0, 2, 1);
 		mPlayerTextureRegion = TextureRegionFactory.createTiledFromAsset(
-				playerTexture, this, "player.png", 0, 0, 3, 1); // 72x128
+				playerTexture, this, "jet.png", 0, 0, 2, 1); // 72x128
 		bulletTexture = new Texture(16, 32, TextureOptions.BILINEAR);
 		mBulletTextureRegion = TextureRegionFactory.createFromAsset(bulletTexture, this, "bullet2.png", 0, 0);
 
@@ -306,6 +305,7 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 					long maxMemory = Runtime.getRuntime().maxMemory();
 					long freeMemory = Runtime.getRuntime().freeMemory();
 					Debug.d("total memory : " + totalMemory + " max memory: " + maxMemory + " free memory : " + freeMemory);
+					Debug.d("player x : " + player.getX() + " player y : " + player.getY() + " player width : " + player.getWidth() + " " + player.getWidthScaled() + " player height: " + player.getHeight() + " " + player.getHeightScaled());
 			}
 		}));
 		
@@ -341,16 +341,20 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 			}
 			if(now - currentTimeInmillis >= SHOT_TIME_INTERVAL)
 			{
-				ShootableSprite shootableSprite = new ShootableSprite(player.getX(), player.getY(), mBulletTextureRegion, scene.getTopLayer());
+				float pX = player.getX() + player.getWidth() / 2.0f;
+				float pY = player.getY() - player.getHeight() / 2.0f;
+				
+				/*ShootableSprite shootableSprite = new ShootableSprite(pX - 5, pY + 5, mBulletTextureRegion, scene.getTopLayer());
 				IPositionChangedListener iPositionChangedListener = new BasePositionChangedListener(shootableSprite, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, this);
 				shootableSprite.setiPositionChangedListener(iPositionChangedListener);
 				IShootable iShootable = new BulletShootable(shootableSprite, 0, -100);
 				shootableSprite.setiShootable(iShootable);
-				shootableSprite.shoot();
-				ShootableAnimatedSprite shootableSprite2 = new ShootableAnimatedSprite(player.getX(), player.getY(), greenBallTextureRegion, scene.getTopLayer());
-				iPositionChangedListener = new BasePositionChangedListener(shootableSprite, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, this);
+				shootableSprite.shoot();*/
+				ShootableAnimatedSprite shootableSprite = new ShootableAnimatedSprite(pX - 5.5f, pY + 5.5f, greenBallTextureRegion, scene.getTopLayer());
+				IShootable iShootable = new BulletShootable(shootableSprite, 0, -100);
+				IPositionChangedListener iPositionChangedListener = new BasePositionChangedListener(shootableSprite, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, this);
 				shootableSprite.setiPositionChangedListener(iPositionChangedListener);
-				iShootable = new BulletShootable(shootableSprite2, 0, -100);
+				iShootable = new BulletShootable(shootableSprite, 0, -100);
 				shootableSprite.setiShootable(iShootable);
 				shootableSprite.shoot();
 //				explosionSound.play();
