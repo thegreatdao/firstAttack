@@ -3,7 +3,7 @@ package com.emptyyourmind.utils;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.shape.Shape;
 
-public class MainUtils
+public class JetsFightUtils
 {
 	public static boolean isInCamera(Camera camera, Shape shape, float cameraHalfWidth, float cameraHalfHeight)
 	{
@@ -14,5 +14,17 @@ public class MainUtils
 			return true;
 		}
 		return false;
+	}
+	
+	public static int getMinimumPowerOf2(int number)
+	{
+		int result = 1;
+		int i = 1;
+		while(result < number)
+		{
+			result = (int) Math.pow(2, i);
+			i++;
+		}
+		return result;
 	}
 }

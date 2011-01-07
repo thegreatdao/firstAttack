@@ -13,8 +13,8 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.BoundCamera;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
-import org.anddev.andengine.engine.camera.hud.controls.BaseOnScreenControl;
 import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
+import org.anddev.andengine.engine.camera.hud.controls.BaseOnScreenControl;
 import org.anddev.andengine.engine.handler.timer.ITimerCallback;
 import org.anddev.andengine.engine.handler.timer.TimerHandler;
 import org.anddev.andengine.engine.options.EngineOptions;
@@ -23,13 +23,13 @@ import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolic
 import org.anddev.andengine.entity.layer.ILayer;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLayer;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader;
+import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader.ITMXTilePropertiesListener;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXObject;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXObjectGroup;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXProperties;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTile;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTileProperty;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTiledMap;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader.ITMXTilePropertiesListener;
 import org.anddev.andengine.entity.layer.tiled.tmx.util.exception.TMXLoadException;
 import org.anddev.andengine.entity.primitive.Line;
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -37,7 +37,6 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
 import org.anddev.andengine.entity.shape.Shape;
 import org.anddev.andengine.entity.sprite.AnimatedSprite;
-import org.anddev.andengine.entity.sprite.BaseSprite;
 import org.anddev.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
 import org.anddev.andengine.extension.physics.box2d.PhysicsConnector;
 import org.anddev.andengine.extension.physics.box2d.PhysicsFactory;
@@ -53,14 +52,18 @@ import org.anddev.andengine.util.Debug;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.emptyyourmind.entity.BasePositionChangedListener;
+import com.emptyyourmind.entity.IPositionChangedListener;
+import com.emptyyourmind.entity.IShootable;
 import com.emptyyourmind.entity.NonShootableAnimatedSprite;
-import com.emptyyourmind.entity.NonShootableSprite;
+import com.emptyyourmind.entity.ShootableAnimatedSprite;
+import com.emptyyourmind.entity.ShootableSprite;
+import com.emptyyourmind.entity.shootables.BulletShootable;
 
 
-public class Main extends BaseGameActivity implements IOnSceneTouchListener
+public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 {
 	private static final int CAMERA_WIDTH = 320;
 	private static final int CAMERA_HEIGHT = 480;
@@ -226,11 +229,11 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		 * Calculate the coordinates for the face, so its centered on the
 		 * camera.
 		 */
-		enemyBoss = new NonShootableAnimatedSprite(100, 100, enemyBossTextureRegion, null);
+		enemyBoss = new NonShootableAnimatedSprite(100, 100, enemyBossTextureRegion, scene.getTopLayer());
 		enemyBoss.animate(200);
 		scene.getTopLayer().addEntity(enemyBoss);
 		/* Create the sprite and add it to the scene. */
-		player = new NonShootableAnimatedSprite(playerSpawnX, playerSpawnY, mPlayerTextureRegion, null);
+		player = new NonShootableAnimatedSprite(playerSpawnX, playerSpawnY, mPlayerTextureRegion, scene.getTopLayer());
 		player.animate(200);
 		scene.getTopLayer().addEntity(player);
 		player.setUpdatePhysics(false);
@@ -261,7 +264,7 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 					public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY)
 					{
 						this.mVelocityTemp.set(pValueX * 2.1f, pValueY * 3.1f);
-						Main.this.playerBody.setLinearVelocity(this.mVelocityTemp);
+						JetsFight.this.playerBody.setLinearVelocity(this.mVelocityTemp);
 					}
 					@Override
 					public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl)
@@ -279,10 +282,9 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 //		drawSystem(scene);
 		scene.registerUpdateHandler(physicsWorld);
 
+		final Vector2 v2 = new Vector2();
 		scene.registerUpdateHandler(new TimerHandler(0.5f, true, new ITimerCallback()
 		{
-			
-			Vector2 v2 = new Vector2();
 			@Override
 			public void onTimePassed(TimerHandler pTimerHandler)
 			{
@@ -300,6 +302,10 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 					enemyBody.setLinearVelocity(v2);
 					flip = !flip;
 //				}
+					long totalMemory = Runtime.getRuntime().totalMemory();
+					long maxMemory = Runtime.getRuntime().maxMemory();
+					long freeMemory = Runtime.getRuntime().freeMemory();
+					Debug.d("total memory : " + totalMemory + " max memory: " + maxMemory + " free memory : " + freeMemory);
 			}
 		}));
 		
@@ -335,7 +341,18 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 			}
 			if(now - currentTimeInmillis >= SHOT_TIME_INTERVAL)
 			{
-				shotBullet(player, pScene.getTopLayer(), 100, 100, false);
+				ShootableSprite shootableSprite = new ShootableSprite(player.getX(), player.getY(), mBulletTextureRegion, scene.getTopLayer());
+				IPositionChangedListener iPositionChangedListener = new BasePositionChangedListener(shootableSprite, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, this);
+				shootableSprite.setiPositionChangedListener(iPositionChangedListener);
+				IShootable iShootable = new BulletShootable(shootableSprite, 0, -100);
+				shootableSprite.setiShootable(iShootable);
+				shootableSprite.shoot();
+				ShootableAnimatedSprite shootableSprite2 = new ShootableAnimatedSprite(player.getX(), player.getY(), greenBallTextureRegion, scene.getTopLayer());
+				iPositionChangedListener = new BasePositionChangedListener(shootableSprite, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, this);
+				shootableSprite.setiPositionChangedListener(iPositionChangedListener);
+				iShootable = new BulletShootable(shootableSprite2, 0, -100);
+				shootableSprite.setiShootable(iShootable);
+				shootableSprite.shoot();
 //				explosionSound.play();
 				currentTimeInmillis = now;
 			}
@@ -408,40 +425,6 @@ public class Main extends BaseGameActivity implements IOnSceneTouchListener
 		bottomLayer.addEntity(top);
 		bottomLayer.addEntity(left);
 		bottomLayer.addEntity(right);
-	}
-	
-	private NonShootableSprite createBullet(float x, float y, final ILayer layer)
-	{
-		final NonShootableSprite bullet = new NonShootableSprite(x, y, mBulletTextureRegion, scene.getTopLayer());
-		bullet.setiPositionChangedListener(new BasePositionChangedListener(bullet, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, this));
-		return bullet;
-	}
-	
-	private void shotBullet(BaseSprite sprite, ILayer layer, float xVelocity, float yVelocity, boolean shootingByEnemey)
-	{
-		float width = sprite.getWidth();
-//		float height = ship.getHeight();
-		float x = sprite.getX();
-		float y = sprite.getY();
-		NonShootableSprite upBullet = createBullet(x + width / 2 - 2, y, layer);
-		if(shootingByEnemey)
-		{
-			upBullet.setVelocity(0, yVelocity);
-		}
-		else
-		{
-			upBullet.setVelocity(0, -yVelocity);
-		}
-		layer.addEntity(upBullet);
-/*		CustomizedSprite downBullet = createBullet(x + width / 2 -2, y - 2 + height, layer);
-		downBullet.setVelocity(0, yVelocity);
-		layer.addEntity(downBullet);
-		CustomizedSprite rightBullet = createBullet(x + width, y + height / 2 - 2, layer);
-		rightBullet.setVelocity(xVelocity, 0);
-		layer.addEntity(rightBullet);
-		CustomizedSprite leftBullet = createBullet(x - 2, y + height / 2 - 2, layer);
-		leftBullet.setVelocity(-xVelocity, 0);
-		layer.addEntity(leftBullet);*/
 	}
 	
 	@SuppressWarnings("unused")

@@ -5,7 +5,7 @@ import org.anddev.andengine.entity.layer.ILayer;
 import org.anddev.andengine.entity.shape.Shape;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 
-import com.emptyyourmind.utils.MainUtils;
+import com.emptyyourmind.utils.JetsFightUtils;
 
 public class BasePositionChangedListener implements IPositionChangedListener
 {
@@ -30,7 +30,7 @@ public class BasePositionChangedListener implements IPositionChangedListener
 	@Override
 	public void onPositionChanged()
 	{
-		if(!MainUtils.isInCamera(camera, shape, cameraHalfWidth, cameraHalfHeight))
+		if(!JetsFightUtils.isInCamera(camera, shape, cameraHalfWidth, cameraHalfHeight))
 		{
 			baseGameActivity.runOnUpdateThread(new Runnable()
 			{
