@@ -4,12 +4,9 @@ import org.anddev.andengine.entity.layer.ILayer;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
-import com.badlogic.gdx.physics.box2d.Body;
-
 public class NonShootableSprite extends Sprite
 {
 	private IPositionChangedListener iPositionChangedListener;
-	private Body body;
 	
 	public NonShootableSprite(float pX, float pY, TextureRegion pTextureRegion, ILayer layer)
 	{
@@ -26,19 +23,10 @@ public class NonShootableSprite extends Sprite
 			iPositionChangedListener.onPositionChanged();
 		}
 	}
-
+	
 	public void setiPositionChangedListener(IPositionChangedListener iPositionChangedListener)
 	{
 		this.iPositionChangedListener = iPositionChangedListener;
 	}
 
-	public Body getBody()
-	{
-		return body;
-	}
-
-	public void setBody(Body body)
-	{
-		this.body = body;
-	}
 }

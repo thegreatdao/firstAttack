@@ -2,6 +2,7 @@ package com.emptyyourmind.activities;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -37,6 +38,7 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
 import org.anddev.andengine.entity.shape.Shape;
 import org.anddev.andengine.entity.sprite.AnimatedSprite;
+import org.anddev.andengine.entity.sprite.BaseSprite;
 import org.anddev.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
 import org.anddev.andengine.extension.physics.box2d.PhysicsConnector;
 import org.anddev.andengine.extension.physics.box2d.PhysicsFactory;
@@ -74,6 +76,8 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 	private Sound explosionSound;
 	@SuppressWarnings("unused")
 	private Music backgourndMusic;
+	
+	private TimerHandler updateCameraUpdateHandler;
 
 	private BoundCamera mBoundChaseCamera;
 
@@ -98,6 +102,7 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 	private TiledTextureRegion greenBallTextureRegion;
 	private TextureRegion mOnScreenControlBaseTextureRegion;
 	private TextureRegion mOnScreenControlKnobTextureRegion;
+	@SuppressWarnings("unused")
 	private TextureRegion mBulletTextureRegion;
 	private Scene scene;
 	private long currentTimeInmillis;
@@ -110,6 +115,9 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 	private Shape bottomCameraBound;
 	private Body topCameraBoundBody;
 	private Body bottomCameraBoundBody;
+	
+	@SuppressWarnings("unused")
+	private Collection<BaseSprite> enemies;
 	
 	@Override
 	public Engine onLoadEngine()
@@ -127,8 +135,7 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 		enemyBossTexture = new Texture(256, 64, TextureOptions.DEFAULT);
 		playerTexture = new Texture(128, 64, TextureOptions.DEFAULT);
 		enemyBossTextureRegion = TextureRegionFactory.createTiledFromAsset(enemyBossTexture, this, "enemy.png", 0, 0, 2, 1);
-		mPlayerTextureRegion = TextureRegionFactory.createTiledFromAsset(
-				playerTexture, this, "jet.png", 0, 0, 2, 1); // 72x128
+		mPlayerTextureRegion = TextureRegionFactory.createTiledFromAsset(playerTexture, this, "jet.png", 0, 0, 2, 1); // 72x128
 		bulletTexture = new Texture(16, 32, TextureOptions.BILINEAR);
 		mBulletTextureRegion = TextureRegionFactory.createFromAsset(bulletTexture, this, "bullet2.png", 0, 0);
 
@@ -233,7 +240,7 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 		scene.getTopLayer().addEntity(enemyBoss);
 		/* Create the sprite and add it to the scene. */
 		player = new NonShootableAnimatedSprite(playerSpawnX, playerSpawnY, mPlayerTextureRegion, scene.getTopLayer());
-		player.animate(200);
+		player.animate(1000);
 		scene.getTopLayer().addEntity(player);
 		player.setUpdatePhysics(false);
 		AnimatedSprite mine = new AnimatedSprite(100, 100, mineTextureRegion);
@@ -301,25 +308,28 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 					enemyBody.setLinearVelocity(v2);
 					flip = !flip;
 //				}
-					long totalMemory = Runtime.getRuntime().totalMemory();
-					long maxMemory = Runtime.getRuntime().maxMemory();
-					long freeMemory = Runtime.getRuntime().freeMemory();
-					Debug.d("total memory : " + totalMemory + " max memory: " + maxMemory + " free memory : " + freeMemory);
-					Debug.d("player x : " + player.getX() + " player y : " + player.getY() + " player width : " + player.getWidth() + " " + player.getWidthScaled() + " player height: " + player.getHeight() + " " + player.getHeightScaled());
 			}
 		}));
-		
-		scene.registerUpdateHandler(new TimerHandler(0.1f, true, new ITimerCallback()
+
+		updateCameraUpdateHandler = new TimerHandler(0.1f, true, new ITimerCallback()
 		{
+			private float previousCenterY = 0;
 			@Override
 			public void onTimePassed(TimerHandler pTimerHandler)
 			{
 				float centerX = mBoundChaseCamera.getCenterX();
 				float centerY = mBoundChaseCamera.getCenterY();
 				mBoundChaseCamera.setCenter(player.getX(), centerY - 1.0f);
-				setCameraChaseBound(centerX, centerY);
+				setVerticalCameraChaseBound(centerX, centerY);				
+				if(previousCenterY == centerY)
+				{
+					setHorizontalCameraChaseBound(centerX, centerY);
+					scene.unregisterUpdateHandler(JetsFight.this.updateCameraUpdateHandler);
+				}
+				previousCenterY = centerY;
 			}
-		}));
+		});
+		scene.registerUpdateHandler(updateCameraUpdateHandler);
 		return scene;
 	}
 
@@ -492,9 +502,9 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 		PhysicsFactory.createBoxBody(physicsWorld, right, BodyType.StaticBody, wallFixtureDef);
 	}
 	
-	private void setCameraChaseBound(float centerX, float centerY)
+	private void setVerticalCameraChaseBound(float centerX, float centerY)
 	{
-		ILayer topLayer = scene.getTopLayer();
+		final ILayer topLayer = scene.getTopLayer();
 		if(topCameraBound != null)
 		{
 			topLayer.removeEntity(topCameraBound);
@@ -520,5 +530,19 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 		topLayer.addEntity(bottomCameraBound);
 		topCameraBoundBody = PhysicsFactory.createBoxBody(physicsWorld, topCameraBound, BodyType.StaticBody, wallFixtureDef);
 		bottomCameraBoundBody = PhysicsFactory.createBoxBody(physicsWorld, bottomCameraBound, BodyType.StaticBody, wallFixtureDef);
+	}
+	
+	private void setHorizontalCameraChaseBound(float centerX, float centerY)
+	{
+		final ILayer topLayer = scene.getTopLayer();
+		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
+		final Shape leftCameraBound = new Rectangle(centerX - CAMERA_WIDTH / 2, centerY - CAMERA_HEIGHT / 2, 1, CAMERA_HEIGHT);
+		leftCameraBound.setColor(1, 1, 1, 0);
+		final Shape rightCameraBound = new Rectangle(centerX + CAMERA_WIDTH / 2, centerY - CAMERA_HEIGHT / 2, 1, CAMERA_HEIGHT);
+		rightCameraBound.setColor(0, 0, 0, 0);
+		topLayer.addEntity(leftCameraBound);
+		topLayer.addEntity(rightCameraBound);
+		PhysicsFactory.createBoxBody(physicsWorld, leftCameraBound, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(physicsWorld, rightCameraBound, BodyType.StaticBody, wallFixtureDef);
 	}
 }

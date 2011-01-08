@@ -37,7 +37,7 @@ public class BasePositionChangedListener implements IPositionChangedListener
 				@Override
 				public void run()
 				{
-					layer.removeEntity(shape);					
+					layer.removeEntity(shape);
 				}
 			});
 		}
