@@ -1,6 +1,5 @@
 package com.emptyyourmind.activities;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -14,8 +13,8 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.BoundCamera;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
-import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
 import org.anddev.andengine.engine.camera.hud.controls.BaseOnScreenControl;
+import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
 import org.anddev.andengine.engine.handler.timer.ITimerCallback;
 import org.anddev.andengine.engine.handler.timer.TimerHandler;
 import org.anddev.andengine.engine.options.EngineOptions;
@@ -24,13 +23,13 @@ import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolic
 import org.anddev.andengine.entity.layer.ILayer;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLayer;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader.ITMXTilePropertiesListener;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXObject;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXObjectGroup;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXProperties;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTile;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTileProperty;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTiledMap;
+import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader.ITMXTilePropertiesListener;
 import org.anddev.andengine.entity.layer.tiled.tmx.util.exception.TMXLoadException;
 import org.anddev.andengine.entity.primitive.Line;
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -54,14 +53,15 @@ import org.anddev.andengine.util.Debug;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.emptyyourmind.entity.BasePositionChangedListener;
 import com.emptyyourmind.entity.IPositionChangedListener;
 import com.emptyyourmind.entity.IShootable;
 import com.emptyyourmind.entity.NonShootableAnimatedSprite;
 import com.emptyyourmind.entity.ShootableAnimatedSprite;
 import com.emptyyourmind.entity.shootables.BulletShootable;
+import com.emptyyourmind.utils.JetsFightUtils;
 
 
 public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
@@ -156,14 +156,16 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 		
 		SoundFactory.setAssetBasePath("mfx/");
 		MusicFactory.setAssetBasePath("mfx/");
+		/*
 		try {
 			this.explosionSound = SoundFactory.createSoundFromAsset(this.mEngine.getSoundManager(), this, "explosion.ogg");
 			this.backgourndMusic= MusicFactory.createMusicFromAsset(this.mEngine.getMusicManager(), this, "bg.ogg");
-		/*	backgourndMusic.setLooping(true);
-			backgourndMusic.play();*/
+			backgourndMusic.setLooping(true);
+			backgourndMusic.play();
 		} catch (final IOException e) {
 			Debug.e("Error", e);
 		}
+		 */
 	}
 
 	@Override
@@ -294,9 +296,8 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 			@Override
 			public void onTimePassed(TimerHandler pTimerHandler)
 			{
-				/*if(isInCamera(enemyBoss, mBoundChaseCamera))
-				{*/
-					//shotBullet(enemyBoss, scene.getTopLayer(), 50, 50, true);
+				if(JetsFightUtils.isInCamera(mBoundChaseCamera, enemyBoss, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT))
+				{
 					if(flip)
 					{
 						v2.set(-5, 0);
@@ -307,7 +308,12 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 					}
 					enemyBody.setLinearVelocity(v2);
 					flip = !flip;
-//				}
+					Debug.d("enemy boss is inside camera!");
+				}
+				else
+				{
+					Debug.i("enemy boss is not inside camera!");
+				}
 			}
 		}));
 
