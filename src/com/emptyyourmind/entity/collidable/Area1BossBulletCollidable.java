@@ -27,17 +27,27 @@ public class Area1BossBulletCollidable implements ICollidable
 	@Override
 	public void collide()
 	{
-		if(bullet.getY() >= player.getY())
+		if (bullet.getY() >= player.getY())
 		{
+			final JetsAnimatedSprite player = Area1BossBulletCollidable.this.player;
+			if(!player.isDead())
+			{
+				baseGameActivity.runOnUpdateThread(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						player.damage(damage);
+						Area1BossBulletCollidable.this.layer.removeEntity(bullet);
+					}
+				});
+			}
 			baseGameActivity.runOnUpdateThread(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					JetsAnimatedSprite player = Area1BossBulletCollidable.this.player;
-					player.damage(damage);
-					Area1BossBulletCollidable.this.layer.removeEntity(bullet);
-					if(player.getHealth() <=0)
+					if (player.isDead())
 					{
 						Area1BossBulletCollidable.this.layer.removeEntity(player);
 					}

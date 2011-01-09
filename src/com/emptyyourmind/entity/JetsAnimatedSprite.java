@@ -50,4 +50,9 @@ public class JetsAnimatedSprite extends AnimatedSprite
 	{
 		return health;
 	}
+
+	public boolean isDead()
+	{
+		return health <= 0;
+	}
 }

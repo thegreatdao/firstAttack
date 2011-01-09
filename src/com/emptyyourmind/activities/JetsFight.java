@@ -351,7 +351,7 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 			{
 				currentTimeInmillis = now;
 			}
-			if(now - currentTimeInmillis >= SHOT_TIME_INTERVAL)
+			if(now - currentTimeInmillis >= SHOT_TIME_INTERVAL && !player.isDead())
 			{
 				float pX = player.getX() + player.getWidth() / 2.0f;
 				float pY = player.getY() - player.getHeight() / 2.0f;
