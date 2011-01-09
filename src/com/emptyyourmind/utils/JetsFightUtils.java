@@ -15,16 +15,4 @@ public class JetsFightUtils
 		}
 		return false;
 	}
-	
-	public static int getMinimumPowerOf2(int number)
-	{
-		int result = 1;
-		int i = 1;
-		while(result < number)
-		{
-			result = (int) Math.pow(2, i);
-			i++;
-		}
-		return result;
-	}
 }
