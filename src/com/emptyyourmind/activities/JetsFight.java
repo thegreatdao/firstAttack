@@ -58,8 +58,8 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.emptyyourmind.entity.BasePositionChangedListener;
 import com.emptyyourmind.entity.IPositionChangedListener;
 import com.emptyyourmind.entity.IShootable;
-import com.emptyyourmind.entity.NonShootableAnimatedSprite;
-import com.emptyyourmind.entity.ShootableAnimatedSprite;
+import com.emptyyourmind.entity.JetsAnimatedSprite;
+import com.emptyyourmind.entity.SpriteOnPosistionChangedActionsAggregator;
 import com.emptyyourmind.entity.shootables.BulletShootable;
 import com.emptyyourmind.utils.JetsFightUtils;
 
@@ -89,8 +89,8 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 	private TiledTextureRegion enemyBossTextureRegion;
 	private TMXTiledMap mTMXTiledMap;
 	protected int mCactusCount;
-	private NonShootableAnimatedSprite player;
-	private NonShootableAnimatedSprite enemyBoss;
+	private JetsAnimatedSprite player;
+	private JetsAnimatedSprite enemyBoss;
 	private Body playerBody;
 	private Body enemyBody;
 	
@@ -226,7 +226,6 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 			}
 		}
 		scene.getBottomLayer().addEntity(tmxLayer);
-//		scene.getBottomLayer().addEntity(tmxLayer2);
 		/* Make the camera not exceed the bounds of the TMXLayer. */
 		mBoundChaseCamera.setBounds(0, tmxLayer.getWidth(), 0, tmxLayer.getHeight());		
 		mBoundChaseCamera.setBoundsEnabled(true);
@@ -237,11 +236,11 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 		 * Calculate the coordinates for the face, so its centered on the
 		 * camera.
 		 */
-		enemyBoss = new NonShootableAnimatedSprite(100, 100, enemyBossTextureRegion, scene.getTopLayer());
+		enemyBoss = new JetsAnimatedSprite(100, 100, enemyBossTextureRegion, scene.getTopLayer());
 		enemyBoss.animate(200);
 		scene.getTopLayer().addEntity(enemyBoss);
 		/* Create the sprite and add it to the scene. */
-		player = new NonShootableAnimatedSprite(playerSpawnX, playerSpawnY, mPlayerTextureRegion, scene.getTopLayer());
+		player = new JetsAnimatedSprite(playerSpawnX, playerSpawnY, mPlayerTextureRegion, scene.getTopLayer());
 		player.animate(1000);
 		scene.getTopLayer().addEntity(player);
 		player.setUpdatePhysics(false);
@@ -261,7 +260,6 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 		setBorder(scene);
 		scene.setOnSceneTouchListener(this);
 		mBoundChaseCamera.setCenter(mapWidth/2, mapHeight);
-//		mBoundChaseCamera.setChaseShape(player);
 
 		final AnalogOnScreenControl analogOnScreenControl = new AnalogOnScreenControl(
 				0, CAMERA_HEIGHT - mOnScreenControlBaseTextureRegion.getHeight(), mBoundChaseCamera, mOnScreenControlBaseTextureRegion, mOnScreenControlKnobTextureRegion, 0.1f, 200,
@@ -308,11 +306,6 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 					}
 					enemyBody.setLinearVelocity(v2);
 					flip = !flip;
-					Debug.d("enemy boss is inside camera!");
-				}
-				else
-				{
-					Debug.i("enemy boss is not inside camera!");
 				}
 			}
 		}));
@@ -366,14 +359,13 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 				IShootable iShootable = new BulletShootable(shootableSprite, 0, -100);
 				shootableSprite.setiShootable(iShootable);
 				shootableSprite.shoot();*/
-				ShootableAnimatedSprite shootableSprite = new ShootableAnimatedSprite(pX - 5.5f, pY + 5.5f, greenBallTextureRegion, scene.getTopLayer());
+				JetsAnimatedSprite shootableSprite = new JetsAnimatedSprite(pX - 5.5f, pY + 5.5f, greenBallTextureRegion, scene.getTopLayer());
 				IShootable iShootable = new BulletShootable(shootableSprite, 0, -100);
-				IPositionChangedListener iPositionChangedListener = new BasePositionChangedListener(shootableSprite, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, this);
-				shootableSprite.setiPositionChangedListener(iPositionChangedListener);
-				iShootable = new BulletShootable(shootableSprite, 0, -100);
 				shootableSprite.setiShootable(iShootable);
-				shootableSprite.shoot();
-//				explosionSound.play();
+				SpriteOnPosistionChangedActionsAggregator spriteListenersAggregator = new SpriteOnPosistionChangedActionsAggregator();
+				IPositionChangedListener iPositionChangedListener = new BasePositionChangedListener(shootableSprite, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, this);
+				spriteListenersAggregator.setiPositionChangedListener(iPositionChangedListener);
+				shootableSprite.setSlAggregator(spriteListenersAggregator);
 				currentTimeInmillis = now;
 			}
 		}

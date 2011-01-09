@@ -3,7 +3,7 @@ package com.emptyyourmind.entity;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SpriteListenersAggregator implements IPositionChangedListener
+public class SpriteOnPosistionChangedActionsAggregator implements IPositionChangedListener
 {
 	private Set<ICollidable> iCollidables;
 	private IPositionChangedListener iPositionChangedListener;

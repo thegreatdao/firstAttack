@@ -8,19 +8,19 @@ public class BulletShootable implements IShootable
 {
 	private float xVelocity;
 	private float yVelocity;
-	private Shape shotFrom;
+	private Shape shootFrom;
 	
-	public BulletShootable(Shape attachTo, float xVelocity, float yVelocity)
+	public BulletShootable(Shape shootFrom, float xVelocity, float yVelocity)
 	{
 		this.xVelocity = xVelocity;
 		this.yVelocity = yVelocity;
-		this.shotFrom = attachTo;
+		this.shootFrom = shootFrom;
 	}
 
 	@Override
 	public void shoot()
 	{
-		shotFrom.setVelocity(xVelocity, yVelocity);
+		shootFrom.setVelocity(xVelocity, yVelocity);
 	}
 
 }
