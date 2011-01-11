@@ -55,7 +55,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.emptyyourmind.entity.BasePositionChangedListener;
-import com.emptyyourmind.entity.DamageAndSupply;
+import com.emptyyourmind.entity.JetsFightConstants;
 import com.emptyyourmind.entity.IPositionChangedListener;
 import com.emptyyourmind.entity.IShootable;
 import com.emptyyourmind.entity.JetsAnimatedSprite;
@@ -136,6 +136,7 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 		mPlayerTextureRegion = TextureRegionFactory.createTiledFromAsset(playerTexture, this, "jet.png", 0, 0, 2, 1); // 72x128
 		bulletTexture = new Texture(16, 32, TextureOptions.BILINEAR);
 		mBulletTextureRegion = TextureRegionFactory.createFromAsset(bulletTexture, this, "bullet2.png", 0, 0);
+		mBulletTextureRegion.setFlippedVertical(true);
 
 		mOnScreenControlTexture = new Texture(256, 128,
 				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
@@ -230,10 +231,10 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 		mapWidth = (int)tmxLayer.getWidth();
 		mapHeight = (int)tmxLayer.getHeight();
 
-		enemyBoss = new JetsAnimatedSprite(100, 100, enemyBossTextureRegion, scene.getTopLayer(), DamageAndSupply.AREA1_BOSS_HEALTH);
+		enemyBoss = new JetsAnimatedSprite(100, 100, enemyBossTextureRegion, scene.getTopLayer(), JetsFightConstants.AREA1_BOSS_HEALTH);
 		enemyBoss.animate(200);
 		scene.getTopLayer().addEntity(enemyBoss);
-		player = new JetsAnimatedSprite(playerSpawnX, playerSpawnY, mPlayerTextureRegion, scene.getTopLayer(), DamageAndSupply.JET_PLAYER_HEALTH);
+		player = new JetsAnimatedSprite(playerSpawnX, playerSpawnY, mPlayerTextureRegion, scene.getTopLayer(), JetsFightConstants.JET_PLAYER_HEALTH);
 		player.animate(1000);
 		scene.getTopLayer().addEntity(player);
 		player.setUpdatePhysics(false);
@@ -296,7 +297,8 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 					setHorizontalCameraChaseBound(centerX, centerY);
 					scene.unregisterUpdateHandler(JetsFight.this.updateCameraUpdateHandler);
 					// now the enemy is within the camera we should animate the area boss
-					scene.registerUpdateHandler(new TimerHandler(0.5f, true, new ITimerCallback()
+					final float pTimerSeconds = 6f;
+					scene.registerUpdateHandler(new TimerHandler(pTimerSeconds, true, new ITimerCallback()
 					{
 						private Random random = new Random();
 						private boolean flip;
@@ -321,7 +323,7 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 							SpriteOnPosistionChangedActionsAggregator spriteListenersAggregator = new SpriteOnPosistionChangedActionsAggregator();
 							IPositionChangedListener iPositionChangedListener = new BasePositionChangedListener(shootableSprite, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, JetsFight.this);
 							spriteListenersAggregator.setiPositionChangedListener(iPositionChangedListener);
-							Area1BossBulletCollidable area1BossBulletCollidable = new Area1BossBulletCollidable(shootableSprite, player, JetsFight.this, scene.getTopLayer(), DamageAndSupply.AREA1_BOSS_BULLET_DAMAGE);
+							Area1BossBulletCollidable area1BossBulletCollidable = new Area1BossBulletCollidable(shootableSprite, player, JetsFight.this, scene.getTopLayer(), JetsFightConstants.AREA1_BOSS_BULLET_DAMAGE);
 							spriteListenersAggregator.addCollidable(area1BossBulletCollidable);
 							shootableSprite.setSlAggregator(spriteListenersAggregator);
 						}
@@ -355,7 +357,7 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 			{
 				float pX = player.getX() + player.getWidth() / 2.0f;
 				float pY = player.getY() - player.getHeight() / 2.0f;
-				JetsAnimatedSprite shootableSprite = new JetsAnimatedSprite(pX - 5.5f, pY + 5.5f, greenBallTextureRegion, scene.getTopLayer(), DamageAndSupply.AREA1_BOSS_BULLET_DAMAGE);
+				JetsAnimatedSprite shootableSprite = new JetsAnimatedSprite(pX - 5.5f, pY + 5.5f, greenBallTextureRegion, scene.getTopLayer(), JetsFightConstants.AREA1_BOSS_BULLET_DAMAGE);
 				shootableSprite.setiShootable(new BulletShootable(shootableSprite, 0, -100));
 				SpriteOnPosistionChangedActionsAggregator spriteListenersAggregator = new SpriteOnPosistionChangedActionsAggregator();
 				IPositionChangedListener iPositionChangedListener = new BasePositionChangedListener(shootableSprite, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, this);

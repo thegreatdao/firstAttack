@@ -7,6 +7,7 @@ public class SpriteOnPosistionChangedActionsAggregator implements IPositionChang
 {
 	private Set<ICollidable> iCollidables;
 	private IPositionChangedListener iPositionChangedListener;
+	private IResetable iResetable;
 	
 	@Override
 	public void onPositionChanged()
@@ -36,6 +37,16 @@ public class SpriteOnPosistionChangedActionsAggregator implements IPositionChang
 			iCollidables = new HashSet<ICollidable>();
 		}
 		iCollidables.add(iCollidable);
+	}
+
+	public void setiResetable(IResetable iResetable)
+	{
+		this.iResetable = iResetable;
+	}
+
+	public IResetable getiResetable()
+	{
+		return iResetable;
 	}
 	
 }

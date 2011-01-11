@@ -55,4 +55,13 @@ public class JetsAnimatedSprite extends AnimatedSprite
 	{
 		return health <= 0;
 	}
+	
+	public void rest()
+	{
+		IResetable resetable = slAggregator.getiResetable();
+		if(resetable != null)
+		{
+			resetable.reset();
+		}
+	}
 }

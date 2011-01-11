@@ -2,10 +2,13 @@ package com.emptyyourmind.entity.collidable;
 
 import org.anddev.andengine.entity.layer.ILayer;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
+import org.anddev.andengine.util.Debug;
 
 import com.emptyyourmind.entity.ICollidable;
 import com.emptyyourmind.entity.JetsAnimatedSprite;
+import com.emptyyourmind.entity.JetsFightConstants;
 import com.emptyyourmind.entity.JetsSprite;
+import com.emptyyourmind.utils.JetsFightUtils;
 
 public class Area1BossBulletCollidable implements ICollidable
 {
@@ -27,8 +30,22 @@ public class Area1BossBulletCollidable implements ICollidable
 	@Override
 	public void collide()
 	{
-		if (bullet.getY() >= player.getY())
+		final float centerX = bullet.getX() + JetsFightConstants.BULLET_AREA1_BOSS_RADIUS;
+		final float centerY = bullet.getY() + JetsFightConstants.BULLET_AREA1_BOSS_DISTANCE_BTW_TOP_AND_CENTER;
+		final float radius = JetsFightConstants.BULLET_AREA1_BOSS_RADIUS;
+		
+		final float width = player.getWidth();
+		final float xMid = player.getX() + width / 2.0f;
+		final float halfVerticalWidth = JetsFightConstants.PLAYER_VERTICAL_BODY_WIDTH / 2.0f;
+		final float xTop = xMid - halfVerticalWidth;
+		final float yLeft = player.getY();
+		final float xBottom = xMid + halfVerticalWidth;
+		final float yRight = player.getY() + JetsFightConstants.PLAYER_VERTICAL_BODY_HEIGHT;
+		
+		if (JetsFightUtils.ciricleCollidesWithRectangle(centerX, centerY, radius, xTop, yLeft, xBottom, yRight))
 		{
+			Debug.d("centerX : " + centerX + " centerY : " + centerY + " radius : " + radius);
+			Debug.d("xTop : " + xTop + " yLeft : " + yLeft + " xBottom : " + xBottom + " yRight : " + yRight);
 			final JetsAnimatedSprite player = Area1BossBulletCollidable.this.player;
 			if(!player.isDead())
 			{
@@ -42,17 +59,17 @@ public class Area1BossBulletCollidable implements ICollidable
 					}
 				});
 			}
-			baseGameActivity.runOnUpdateThread(new Runnable()
+			else
 			{
-				@Override
-				public void run()
+				baseGameActivity.runOnUpdateThread(new Runnable()
 				{
-					if (player.isDead())
+					@Override
+					public void run()
 					{
 						Area1BossBulletCollidable.this.layer.removeEntity(player);
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 
