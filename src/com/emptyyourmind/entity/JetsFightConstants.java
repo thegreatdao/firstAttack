@@ -16,4 +16,5 @@ public class JetsFightConstants
 	
 	public static final int PLAYER_HORIZONTAL_BODY_WIDTH = 45;
 	public static final int PLAYER_HORIZONTAL_BODY_HEIGHT = 15;
+	public static final int PLAYER_WING_TO_HEAD_DISTANCE = 24;
 }

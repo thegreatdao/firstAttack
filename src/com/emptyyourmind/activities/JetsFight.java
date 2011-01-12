@@ -238,11 +238,11 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 		player.animate(1000);
 		scene.getTopLayer().addEntity(player);
 		player.setUpdatePhysics(false);
-		AnimatedSprite mine = new AnimatedSprite(100, 100, mineTextureRegion);
+		final AnimatedSprite mine = new AnimatedSprite(100, 100, mineTextureRegion);
 		mine.animate(200);
 		scene.getBottomLayer().addEntity(mine);
 		
-		AnimatedSprite greenBall = new AnimatedSprite(200,200, greenBallTextureRegion);
+		final AnimatedSprite greenBall = new AnimatedSprite(200,200, greenBallTextureRegion);
 		greenBall.animate(200);
 		scene.getTopLayer().addEntity(greenBall);
 		final FixtureDef carFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
@@ -297,7 +297,7 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 					setHorizontalCameraChaseBound(centerX, centerY);
 					scene.unregisterUpdateHandler(JetsFight.this.updateCameraUpdateHandler);
 					// now the enemy is within the camera we should animate the area boss
-					final float pTimerSeconds = 6f;
+					final float pTimerSeconds = 0.5f;
 					scene.registerUpdateHandler(new TimerHandler(pTimerSeconds, true, new ITimerCallback()
 					{
 						private Random random = new Random();
@@ -317,7 +317,14 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 							}
 							enemyBody.setLinearVelocity(v2);
 							flip = !flip;
-							JetsSprite shootableSprite = new JetsSprite(enemyBoss.getX() - 5, enemyBoss.getY() + 5, mBulletTextureRegion, scene.getTopLayer());
+							fire(enemyBoss.getX() - 20, enemyBoss.getY() + 5, mBulletTextureRegion, scene.getTopLayer());
+							fire(enemyBoss.getX() - 10, enemyBoss.getY() + 5, mBulletTextureRegion, scene.getTopLayer());
+							fire(enemyBoss.getX() + 10, enemyBoss.getY() + 5, mBulletTextureRegion, scene.getTopLayer());
+							fire(enemyBoss.getX() + 20, enemyBoss.getY() + 5, mBulletTextureRegion, scene.getTopLayer());
+						}
+						private void fire(final float x, final float y, TextureRegion textureRegion, ILayer layer)
+						{
+							JetsSprite shootableSprite = new JetsSprite(x, y, textureRegion, layer);
 							IShootable iShootable = new BulletShootable(shootableSprite, 0, 50);
 							shootableSprite.setiShootable(iShootable);
 							SpriteOnPosistionChangedActionsAggregator spriteListenersAggregator = new SpriteOnPosistionChangedActionsAggregator();

@@ -2,7 +2,6 @@ package com.emptyyourmind.entity.collidable;
 
 import org.anddev.andengine.entity.layer.ILayer;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
-import org.anddev.andengine.util.Debug;
 
 import com.emptyyourmind.entity.ICollidable;
 import com.emptyyourmind.entity.JetsAnimatedSprite;
@@ -42,10 +41,15 @@ public class Area1BossBulletCollidable implements ICollidable
 		final float xBottom = xMid + halfVerticalWidth;
 		final float yRight = player.getY() + JetsFightConstants.PLAYER_VERTICAL_BODY_HEIGHT;
 		
-		if (JetsFightUtils.ciricleCollidesWithRectangle(centerX, centerY, radius, xTop, yLeft, xBottom, yRight))
+		final float halfHorizontalWidth = JetsFightConstants.PLAYER_HORIZONTAL_BODY_WIDTH / 2.0f;
+		final float xTopH = xMid - halfHorizontalWidth;
+		final float yLeftH = player.getY() - 1;
+		final float xBottomH = xMid + halfHorizontalWidth;
+		final float yRightH = player.getY() + JetsFightConstants.PLAYER_HORIZONTAL_BODY_HEIGHT;
+		
+		if (JetsFightUtils.ciricleCollidesWithRectangle(centerX, centerY, radius, xTop, yLeft, xBottom, yRight)
+				|| JetsFightUtils.ciricleCollidesWithRectangle(centerX, centerY, radius, xTopH, yLeftH, xBottomH, yRightH))
 		{
-			Debug.d("centerX : " + centerX + " centerY : " + centerY + " radius : " + radius);
-			Debug.d("xTop : " + xTop + " yLeft : " + yLeft + " xBottom : " + xBottom + " yRight : " + yRight);
 			final JetsAnimatedSprite player = Area1BossBulletCollidable.this.player;
 			if(!player.isDead())
 			{
@@ -59,7 +63,7 @@ public class Area1BossBulletCollidable implements ICollidable
 					}
 				});
 			}
-			else
+			if(player.isDead())
 			{
 				baseGameActivity.runOnUpdateThread(new Runnable()
 				{
