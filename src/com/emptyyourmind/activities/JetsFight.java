@@ -96,6 +96,7 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 	
 	private Texture mOnScreenControlTexture;
 	private Texture bulletTexture;
+	private Texture bulletSmallTexture;
 	private Texture mineTexture;
 	private Texture greenBallTexture;
 	private TiledTextureRegion mineTextureRegion;
@@ -103,6 +104,7 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 	private TextureRegion mOnScreenControlBaseTextureRegion;
 	private TextureRegion mOnScreenControlKnobTextureRegion;
 	private TextureRegion mBulletTextureRegion;
+	private TextureRegion bulletSmallTextureRegion;
 	private Scene scene;
 	private long currentTimeInmillis;
 	private static final int SHOT_TIME_INTERVAL = 200;
@@ -134,8 +136,10 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 		playerTexture = new Texture(128, 64, TextureOptions.DEFAULT);
 		enemyBossTextureRegion = TextureRegionFactory.createTiledFromAsset(enemyBossTexture, this, "enemy.png", 0, 0, 2, 1);
 		mPlayerTextureRegion = TextureRegionFactory.createTiledFromAsset(playerTexture, this, "jet.png", 0, 0, 2, 1); // 72x128
-		bulletTexture = new Texture(16, 32, TextureOptions.BILINEAR);
+		bulletTexture = new Texture(16, 32, TextureOptions.DEFAULT);
+		bulletSmallTexture = new Texture(8, 8, TextureOptions.DEFAULT);
 		mBulletTextureRegion = TextureRegionFactory.createFromAsset(bulletTexture, this, "bullet2.png", 0, 0);
+		bulletSmallTextureRegion = TextureRegionFactory.createFromAsset(bulletSmallTexture, this, "bullet.png", 0, 0);
 		mBulletTextureRegion.setFlippedVertical(true);
 
 		mOnScreenControlTexture = new Texture(256, 128,
@@ -151,7 +155,8 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 		greenBallTexture = new Texture(64, 16, TextureOptions.DEFAULT);
 		mineTextureRegion = TextureRegionFactory.createTiledFromAsset(mineTexture, this, "mine.png", 0, 0, 3, 1);
 		greenBallTextureRegion = TextureRegionFactory.createTiledFromAsset(greenBallTexture, this, "greenBall.png", 0, 0, 4, 1);
-		mEngine.getTextureManager().loadTextures(playerTexture, bulletTexture, mOnScreenControlTexture, mineTexture, greenBallTexture, enemyBossTexture);
+		mEngine.getTextureManager().loadTextures(playerTexture, bulletTexture, mOnScreenControlTexture, 
+				mineTexture, greenBallTexture, enemyBossTexture, bulletSmallTexture);
 		
 		SoundFactory.setAssetBasePath("mfx/");
 		MusicFactory.setAssetBasePath("mfx/");
@@ -321,11 +326,25 @@ public class JetsFight extends BaseGameActivity implements IOnSceneTouchListener
 							fire(enemyBoss.getX() - 10, enemyBoss.getY() + 5, mBulletTextureRegion, scene.getTopLayer());
 							fire(enemyBoss.getX() + 10, enemyBoss.getY() + 5, mBulletTextureRegion, scene.getTopLayer());
 							fire(enemyBoss.getX() + 20, enemyBoss.getY() + 5, mBulletTextureRegion, scene.getTopLayer());
+							fireSmallBullet(enemyBoss.getX(), enemyBoss.getY(), bulletSmallTextureRegion, scene.getTopLayer());
 						}
 						private void fire(final float x, final float y, TextureRegion textureRegion, ILayer layer)
 						{
 							JetsSprite shootableSprite = new JetsSprite(x, y, textureRegion, layer);
 							IShootable iShootable = new BulletShootable(shootableSprite, 0, 50);
+							shootableSprite.setiShootable(iShootable);
+							SpriteOnPosistionChangedActionsAggregator spriteListenersAggregator = new SpriteOnPosistionChangedActionsAggregator();
+							IPositionChangedListener iPositionChangedListener = new BasePositionChangedListener(shootableSprite, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, JetsFight.this);
+							spriteListenersAggregator.setiPositionChangedListener(iPositionChangedListener);
+							Area1BossBulletCollidable area1BossBulletCollidable = new Area1BossBulletCollidable(shootableSprite, player, JetsFight.this, scene.getTopLayer(), JetsFightConstants.AREA1_BOSS_BULLET_DAMAGE);
+							spriteListenersAggregator.addCollidable(area1BossBulletCollidable);
+							shootableSprite.setSlAggregator(spriteListenersAggregator);
+						}
+						
+						private void fireSmallBullet(final float x, final float y, TextureRegion textureRegion, ILayer layer)
+						{
+							JetsSprite shootableSprite = new JetsSprite(x, y, textureRegion, layer);
+							IShootable iShootable = new BulletShootable(shootableSprite, 0, 100);
 							shootableSprite.setiShootable(iShootable);
 							SpriteOnPosistionChangedActionsAggregator spriteListenersAggregator = new SpriteOnPosistionChangedActionsAggregator();
 							IPositionChangedListener iPositionChangedListener = new BasePositionChangedListener(shootableSprite, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, JetsFight.this);
