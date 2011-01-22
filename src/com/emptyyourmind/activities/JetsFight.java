@@ -283,7 +283,7 @@ public class JetsFight extends BaseGameActivity
 		scene.setChildScene(analogOnScreenControl);
 //		drawSystem(scene);
 		scene.registerUpdateHandler(physicsWorld);
-		TimerHandler playerShootHandler = new TimerHandler(0.1f, true, new ITimerCallback()
+		TimerHandler playerShootHandler = new TimerHandler(0.06f, true, new ITimerCallback()
 		{
 			
 			@Override
@@ -299,7 +299,7 @@ public class JetsFight extends BaseGameActivity
 					float pX = player.getX() + player.getWidth() / 2.0f;
 					float pY = player.getY() - player.getHeight() / 2.0f;
 					JetsAnimatedSprite shootableSprite = new JetsAnimatedSprite(pX - 5.5f, pY + 5.5f, greenBallTextureRegion, scene.getTopLayer(), JetsFightConstants.AREA1_BOSS_BULLET_DAMAGE);
-					shootableSprite.setiShootable(new BulletShootable(shootableSprite, 0, -100));
+					shootableSprite.setiShootable(new BulletShootable(shootableSprite, 0, -300));
 					SpriteOnPosistionChangedActionsAggregator spriteListenersAggregator = new SpriteOnPosistionChangedActionsAggregator();
 					IPositionChangedListener iPositionChangedListener = new BasePositionChangedListener(shootableSprite, scene.getTopLayer(), mBoundChaseCamera, CAMERA_HALF_WIDTH, CAMERA_HALF_HEIGHT, JetsFight.this);
 					spriteListenersAggregator.setiPositionChangedListener(iPositionChangedListener);
