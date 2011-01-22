@@ -1,5 +1,6 @@
 package com.emptyyourmind.activities;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
@@ -13,8 +14,8 @@ import org.anddev.andengine.audio.sound.SoundFactory;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.BoundCamera;
 import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
-import org.anddev.andengine.engine.camera.hud.controls.BaseOnScreenControl;
 import org.anddev.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
+import org.anddev.andengine.engine.camera.hud.controls.BaseOnScreenControl;
 import org.anddev.andengine.engine.handler.timer.ITimerCallback;
 import org.anddev.andengine.engine.handler.timer.TimerHandler;
 import org.anddev.andengine.engine.options.EngineOptions;
@@ -23,13 +24,13 @@ import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolic
 import org.anddev.andengine.entity.layer.ILayer;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLayer;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader;
+import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader.ITMXTilePropertiesListener;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXObject;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXObjectGroup;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXProperties;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTile;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTileProperty;
 import org.anddev.andengine.entity.layer.tiled.tmx.TMXTiledMap;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader.ITMXTilePropertiesListener;
 import org.anddev.andengine.entity.layer.tiled.tmx.util.exception.TMXLoadException;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
@@ -50,8 +51,8 @@ import org.anddev.andengine.util.Debug;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.emptyyourmind.entity.BasePositionChangedListener;
 import com.emptyyourmind.entity.IPositionChangedListener;
 import com.emptyyourmind.entity.IShootable;
@@ -72,7 +73,6 @@ public class JetsFight extends BaseGameActivity
 	private int mapHeight;
 	@SuppressWarnings("unused")
 	private Sound explosionSound;
-	@SuppressWarnings("unused")
 	private Music backgourndMusic;
 	
 	private TimerHandler updateCameraUpdateHandler;
@@ -134,7 +134,7 @@ public class JetsFight extends BaseGameActivity
 		playerTexture = new Texture(128, 64, TextureOptions.DEFAULT);
 		enemyBossTextureRegion = TextureRegionFactory.createTiledFromAsset(enemyBossTexture, this, "enemy.png", 0, 0, 2, 1);
 		mPlayerTextureRegion = TextureRegionFactory.createTiledFromAsset(playerTexture, this, "jet.png", 0, 0, 2, 1); // 72x128
-		bulletTexture = new Texture(16, 32, TextureOptions.DEFAULT);
+		bulletTexture = new Texture(16, 32, TextureOptions.BILINEAR);
 		bulletSmallTexture = new Texture(8, 8, TextureOptions.DEFAULT);
 		mBulletTextureRegion = TextureRegionFactory.createFromAsset(bulletTexture, this, "bullet2.png", 0, 0);
 		bulletSmallTextureRegion = TextureRegionFactory.createFromAsset(bulletSmallTexture, this, "bullet.png", 0, 0);
@@ -158,16 +158,16 @@ public class JetsFight extends BaseGameActivity
 		
 		SoundFactory.setAssetBasePath("mfx/");
 		MusicFactory.setAssetBasePath("mfx/");
-		/*
+		
 		try {
-			this.explosionSound = SoundFactory.createSoundFromAsset(this.mEngine.getSoundManager(), this, "explosion.ogg");
+//			this.explosionSound = SoundFactory.createSoundFromAsset(this.mEngine.getSoundManager(), this, "explosion.ogg");
 			this.backgourndMusic= MusicFactory.createMusicFromAsset(this.mEngine.getMusicManager(), this, "bg.ogg");
 			backgourndMusic.setLooping(true);
 			backgourndMusic.play();
 		} catch (final IOException e) {
 			Debug.e("Error", e);
 		}
-		 */
+		 
 	}
 
 	@Override

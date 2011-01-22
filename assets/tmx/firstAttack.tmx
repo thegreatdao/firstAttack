@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" width="16" height="22" tilewidth="24" tileheight="28">
+<map version="1.0" orientation="orthogonal" width="16" height="80" tilewidth="24" tileheight="28">
  <tileset firstgid="1" name="secondLevel" tilewidth="24" tileheight="28" spacing="3" margin="2">
   <image source="gfx/secondLevel.png"/>
  </tileset>
  <tileset firstgid="101" name="starWars" tilewidth="24" tileheight="28" spacing="3" margin="2">
   <image source="gfx/starWars.png"/>
  </tileset>
- <layer name="Tile Layer 1" width="16" height="22">
+ <layer name="Tile Layer 1" width="16" height="80">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC2NhYGBgIQKLArEYEhYnUh+xWA+I9YHYgEz9FkBsCcRWZOp3AmJnIHahsr8GCo+08KSVf2Hm6hMwH5d/YeZa4jCfWHeRqx/kLlcoHozpOxULTgPidCScgUMdLlwAxIVIuIjO+quAuBoJ1+BRCwCj6MSLgAUAAA==
+   H4sIAAAAAAAAC+WWS08TURTHK7ij4ErBBQ0I1kCoNaELyg7UFSvo8BF4g2IFw2s3wK7ABwCX6lL9hPwnuSc5Obnnzr3T6SNh8cs8en73PHqnndNCoXDKeAMmDGV2PiXiNGbArIX5HvhlxY9zzh+36XPKil/Osf9Oz79knHF27Kfvv538LUO7vlwjtvi2+lsmVquBz58oeeQn5ozzThwrLEbzY0MDRGDSHBvssxB/JcCPFX/d4mvPv2/9rt8B8pcc9fv4rv59/Umlf41VsOagkeJTzcS0uI6UmjVfElkcV37N12qIRM3yPLI4eeQPnZ8td5whv9wTybNfA2/NsSauK478rrlq95LzDcEe2A+4vwm2wLa5PgY/LHH8PncOwTfQZLFfLT6HO2fgHFykOBzN4Xl3wK5HTXIuFPcdHHnUos1LkjaThEtwJbgOWPMG3AruRMyXgDmH9qP1eA8ewM+MuX6B3+CPkusgxf8L/oH/KXEnBnnus2/SfDkb175x5c1aP89P+0zuLd/+aZ8le+t5l3gGBhiDgf4QeA3GQBEMZ/BfgJE2/CKrIatPNYT6L8ErxmjO3897UAUfMvoLoA4WM/rL4CP4lHNfveKpzbNT/dK61ZT1tX5p3bqyvm9dWf2krs+Gftzftv8Hej8ktpU4DXo/JJpd9un9knC9mz4CbXhKiQAUAAA=
   </data>
  </layer>
- <objectgroup name="Object Layer 1" width="16" height="22">
-  <object name="playerSpawnPoint" x="169" y="549" width="18" height="19"/>
+ <objectgroup name="Object Layer 1" width="16" height="80">
+  <object name="playerSpawnPoint" x="169" y="2173" width="18" height="19"/>
  </objectgroup>
 </map>
